@@ -15,7 +15,10 @@
 
 struct HuffmanDecoder
 {
-    explicit HuffmanDecoder(std::unique_ptr<Huffman::Node> root) : root(std::move(root)) {}
+    explicit HuffmanDecoder(std::unique_ptr<Huffman::Node> root) : root(std::move(root))
+    {
+//        Huffman::dot_huffman_tree("decode.dot", this->root);
+    }
 
     uint32_t decode_character(Bitreader& reader) const
     {

@@ -27,11 +27,18 @@ public:
     Type read_value(uint8_t size)
     {
         Type result;
-        if(index + size > 64)
+        // we need this because shifting by 64 is undefined behaviour
+        if(index == 64)
+        {
+            read_buffer();
+            result = buffer >> (buffer_size - size);
+            index = size;
+        }
+        else if(index + size > 64)
         {
             const auto shift = buffer_size - index;
             result = buffer << index;
-            result <<= size - shift;
+            result >>= index + shift - size;
 
             read_buffer();
 

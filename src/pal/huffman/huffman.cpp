@@ -103,7 +103,33 @@ void Huffman::print_encoding_table(const EncodingTable& table)
         std::bitset<sizeof(uint32_t) * 8> set(table[i].first);
         const auto str = set.to_string();
 
-        std::cout << static_cast<char>(i) << ": ";
-        std::cout << str.substr(str.size() - table[i].second) << '\n';
+        std::cout << char(i) << ": " << str.substr(str.size() - table[i].second) << '\n';
     }
+}
+
+void Huffman::dot_huffman_tree(const std::filesystem::path& path, const std::unique_ptr<Huffman::Node>& root)
+{
+    std::ofstream file(path);
+    file << "digraph G{";
+
+    uint32_t j = 10000000;
+    const auto swap = [&](auto i){ if(i == std::numeric_limits<uint32_t>::max()){ return j++; } else return i; };
+
+    std::function<void(const std::unique_ptr<Node>&, uint32_t, uint8_t)> recursion = [&](const auto& root, auto num, auto depth) -> void
+    {
+        if(root == nullptr) return;
+        const auto c = swap(root->character);
+        file << num << " -> " << c << '\n';
+
+        if (root->left  != nullptr) recursion(root->left , c, depth + 1);
+        if (root->right != nullptr) recursion(root->right, c, depth + 1);
+    };
+
+    recursion(root, -1, 0);
+
+    file << "}";
+
+    auto png = path;
+    png.replace_extension(".png");
+    system(("dot -Tpng " + path.string() + " -o " + png.string() + "&").c_str());
 }

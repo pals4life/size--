@@ -23,7 +23,7 @@ struct HuffmanEncoder
         root  = Huffman::create_huffman_tree(freq);
         table = Huffman::create_huffman_encode_table(root, size);
 
-        Huffman::print_encoding_table(table);
+//        Huffman::dot_huffman_tree("encode.dot", root);
     }
 
     void encode_character(Bitwriter& writer, uint32_t character) const

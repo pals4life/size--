@@ -28,11 +28,4 @@ namespace pal
         fclose(file);
         return string;
     }
-
-    void writeFile(const std::filesystem::path& path, const std::string& string)
-    {
-        std::ofstream file(path);
-        if(not file.is_open()) throw std::runtime_error("could not open file: " + path.string());
-        file << string;
-    }
 }

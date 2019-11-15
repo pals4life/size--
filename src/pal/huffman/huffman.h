@@ -53,6 +53,7 @@ struct Huffman
     [[nodiscard]] static EncodingTable create_huffman_encode_table(const std::unique_ptr<Node>& root, uint32_t num_chars);
 
     static void print_encoding_table(const EncodingTable& table);
+    static void dot_huffman_tree(const std::filesystem::path& path, const std::unique_ptr<Huffman::Node>& root);
 };
 
 

@@ -40,8 +40,8 @@
 
 namespace pal
 {
-    void encode(const std::filesystem::path& path, const std::vector<uint32_t>& string, const std::vector<Production>& productions);
-    std::vector<uint32_t> decode(const std::filesystem::path& path);
+    void encode(const std::filesystem::path& input, const std::vector<uint32_t>& string, const std::vector<Production>& productions);
+    void decode(const std::filesystem::path& input, const std::filesystem::path& output);
 
     void encodeSettings(Bitwriter& writer, Settings settings);
     void encodeHuffmanTree(Bitwriter& writer, const std::unique_ptr<Huffman::Node>& root, Settings settings);
@@ -53,5 +53,5 @@ namespace pal
     std::vector<Production> decodeProductions(Bitreader& reader, HuffmanDecoder& decoder, Settings settings);
     std::vector<uint32_t> decodeString(Bitreader& reader, HuffmanDecoder& decoder, Settings settings);
 
-    std::string calculateYield(const std::vector<uint32_t>& string, const std::vector<Production>& productions);
-};
+    std::string calculateYield(const std::vector<uint32_t>& string, const std::vector<Production>& productions, Settings settings);
+}

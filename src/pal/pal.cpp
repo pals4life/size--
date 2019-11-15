@@ -14,11 +14,11 @@
 namespace pal
 {
 
-void encode(const std::filesystem::path& path, const std::vector<uint32_t>& string, const std::vector<Production>& productions)
+void encode(const std::filesystem::path& input, const std::vector<uint32_t>& string, const std::vector<Production>& productions)
 {
-    Settings settings(string.size(), productions.size(), 0);
+    Settings settings(string.size(), productions.size(), Settings::Flags::reserve);
     HuffmanEncoder encoder(string, productions, settings);
-    Bitwriter writer(path);
+    Bitwriter writer(input);
 
     pal::encodeSettings(writer, settings);
     pal::encodeHuffmanTree(writer, encoder.root, settings);
@@ -26,9 +26,9 @@ void encode(const std::filesystem::path& path, const std::vector<uint32_t>& stri
     pal::encodeString(writer, encoder, string);
 }
 
-std::vector<uint32_t> decode(const std::filesystem::path& path)
+void decode(const std::filesystem::path& input, const std::filesystem::path& output)
 {
-    Bitreader reader(path);
+    Bitreader reader(input);
 
     const auto settings = pal::decodeSettings(reader);
 
@@ -36,7 +36,10 @@ std::vector<uint32_t> decode(const std::filesystem::path& path)
     HuffmanDecoder decoder(std::move(root));
 
     const auto productions = pal::decodeProductions(reader, decoder, settings);
-    return pal::decodeString(reader, decoder, settings);
+    const auto string = pal::decodeString(reader, decoder, settings);
+
+    std::ofstream file(output);
+    file << pal::calculateYield(string, productions, settings);
 }
 
 // ------------------------------------------------------- //
@@ -157,14 +160,33 @@ std::string calculateYield(const std::vector<uint32_t>& string, const std::vecto
         evaluate(productions[i].body[1]);
     }
 
-    const auto size = std::accumulate(yields.begin(), yields.end(), 0);
+    const auto func = [&](auto base, auto index) -> size_t
+    {
+        if(index < 256) return base + 1;
+        else if(settings.reserved() and index < settings.start()) return base + 2;
+        else return base + yields[index - settings.start()].size();
+    };
+
+    const auto size = std::accumulate(string.begin(), string.end(), 0ul, func);
     std::string result(size, '\000');
 
     auto iter = result.begin();
-    for(const auto character : string)
+    for(const auto index : string)
     {
-        const auto& yield = yields[character];
-        iter = std::copy(yield.begin(), yield.end(), iter);
+        if(index < 256)
+        {
+            *iter++ = index;
+        }
+        else if(settings.reserved() and index < settings.start())
+        {
+            *iter++ = index >> 8u;
+            *iter++ = index & 0x000Fu;
+        }
+        else
+        {
+            const auto& yield = yields[index - settings.start()];
+            iter = std::copy(yield.begin(), yield.end(), iter);
+        }
     }
 
     return result;
