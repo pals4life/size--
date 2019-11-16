@@ -1,13 +1,9 @@
-#include <iostream>
-#include "pal/pal.h"
-#include "pal/io.h"
+#include "pal.h"
 
-int main()
+int main(int argc, char** argv)
 {
-    const auto temp = pal::readFile("photo.bmp");
-    std::vector<uint32_t> string(temp.size());
-    std::transform(temp.begin(), temp.end(), string.begin(), [](uint8_t c) -> uint32_t { return c; });
+    std::vector<std::string> arguments(argv + 1, argv + argc);
 
-    pal::encode("test.pal", string, {});
-    pal::decode("test.pal", "new.bmp");
+    pal::encode("photo.bmp", "photo.pal", Algorithm::none);
+//    pal::decode("photo.pal", "new.bmp");
 }
