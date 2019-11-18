@@ -21,7 +21,7 @@ namespace huffman
 //        dotHuffmanTree("decode.dot", this->root);
         }
 
-        Variable decodeVariable(Bitreader& reader) const
+        Variable decodeVariable(Bitreader& reader) const noexcept
         {
             const Node* node = root.get();
             while(not node->leaf())

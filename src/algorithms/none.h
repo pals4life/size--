@@ -22,10 +22,9 @@
 
 namespace algorithm::none
 {
-    std::pair<std::vector<Variable>, std::vector<Production>> compress(const std::string& string)
+    std::pair<std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
     {
-        std::vector<Variable> vec(string.size());
-        std::transform(string.begin(), string.end(), vec.begin(), [](uint8_t c) -> Variable { return c; });
-        return {vec, {}};
+        std::vector<Variable> vec(bytes.begin(), bytes.end());
+        return std::make_pair(std::move(vec), std::vector<Production>());
     }
 }

@@ -12,6 +12,7 @@
 
 #include <fstream>
 #include <filesystem>
+#include "util.h"
 
 class Bitreader
 {
@@ -24,7 +25,7 @@ public:
     }
 
     template<typename Type = uint64_t>
-    Type read_value(uint8_t size)
+    Type read_value(uint8_t size) noexcept
     {
         Type result;
         // we need this because shifting by 64 is undefined behaviour
@@ -54,14 +55,14 @@ public:
     }
 
     template<typename Type>
-    Type read_value()
+    Type read_value() noexcept
     {
         return read_value(sizeof(Type) * 8);
     }
 
-    bool read_bit()
+    bool read_bit() noexcept
     {
-        if(index == 64)
+        if(likely(index == 64))
         {
             read_buffer();
             index = 0;
@@ -70,7 +71,7 @@ public:
         return (buffer >> (buffer_size - index)) & 1u;
     }
 
-    void read_buffer()
+    void read_buffer() noexcept
     {
         file.read(reinterpret_cast<char*>(&buffer), sizeof(buffer));
     }

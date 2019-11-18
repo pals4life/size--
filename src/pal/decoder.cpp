@@ -58,7 +58,6 @@ std::vector<Production> Decoder::decodeProductions(Bitreader& reader, huffman::D
     std::vector<Production> result(settings.productionSize);
     for(size_t i = 0; i < settings.productionSize; i++)
     {
-        result[i].head    = settings.start() + i;
         result[i].body[0] = decoder.decodeVariable(reader);
         result[i].body[1] = decoder.decodeVariable(reader);
     }

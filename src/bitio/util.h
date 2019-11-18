@@ -1,7 +1,7 @@
 //============================================================================
-// @name        : production.h
+// @name        : util.h
 // @author      : Thomas Dooms
-// @date        : 11/16/19
+// @date        : 11/17/19
 // @version     : 
 // @copyright   : BA1 Informatica - Thomas Dooms - University of Antwerp
 // @description : 
@@ -10,9 +10,5 @@
 
 #pragma once
 
-#include <array>
-
-struct Production
-{
-    std::array<uint32_t, 2> body;
-};
+#define likely(x)   __builtin_expect((x), 1)
+#define unlikely(x) __builtin_expect((x), 0)

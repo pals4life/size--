@@ -35,7 +35,7 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
         }
     }();
 
-    Metadata settings(string.size(), productions.size(), Metadata::Flags::reserve);
+    Metadata settings(string.size(), productions.size(), Metadata::Flags::noflags);
     pal::Encoder::encode(output, string, productions, settings);
 }
 
@@ -43,14 +43,15 @@ void decode(const std::filesystem::path& input, const std::filesystem::path& out
 {
     const auto [settings, productions, string] = Decoder::decode(input);
 
-    std::ofstream file(output);
+    std::ofstream file(output, std::ios::binary);
     if(not file.is_open()) throw std::runtime_error("could not open file: " + output.string());
-    file << calculateYield(string, productions, settings);
+    const auto yield = calculateYield(string, productions, settings);
+    file.write(reinterpret_cast<const char*>(&yield), yield.size() * sizeof(uint8_t));
 }
 
 // ------------------------------------------------------- //
 
-std::string readFile(const std::filesystem::path& path)
+std::vector<uint8_t> readFile(const std::filesystem::path& path)
 {
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path.string());
@@ -58,13 +59,13 @@ std::string readFile(const std::filesystem::path& path)
     auto size = static_cast<size_t>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
-    std::string string(size, 0);
+    std::vector<uint8_t> string(size, 0);
     fread(string.data(), 1, size, file);
     fclose(file);
     return string;
 }
 
-std::string calculateYield(const std::vector<uint32_t>& string, const std::vector<Production>& productions, Metadata settings)
+std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata settings)
 {
     std::vector<std::string> yields(productions.size());
 
@@ -99,7 +100,7 @@ std::string calculateYield(const std::vector<uint32_t>& string, const std::vecto
     };
 
     const auto size = std::accumulate(string.begin(), string.end(), 0ul, func);
-    std::string result(size, '\000');
+    std::vector<uint8_t> result(size, '\000');
 
     auto iter = result.begin();
     for(const auto index : string)

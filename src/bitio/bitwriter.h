@@ -28,7 +28,7 @@ public:
         if(index != 0) write_buffer();
     }
 
-    void write_bit(bool bit)
+    void write_bit(bool bit) noexcept
     {
         if(index == 64)
         {
@@ -45,7 +45,7 @@ public:
     }
 
     template<typename Type>
-    void write_value(Type value, uint8_t size)
+    void write_value(Type value, uint8_t size) noexcept
     {
         const auto shift = buffer_size - index;
         if(index == 64)
@@ -76,12 +76,12 @@ public:
     }
 
     template<typename Type>
-    void write_value(Type value)
+    void write_value(Type value) noexcept
     {
         write_value(value, sizeof(value) * 8);
     }
 
-    void write_buffer()
+    void write_buffer() noexcept
     {
 //        std::cout << std::bitset<64>(buffer) << '\n';
         file.write(reinterpret_cast<char*>(&buffer), sizeof(buffer));

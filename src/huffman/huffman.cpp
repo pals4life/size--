@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "huffman.h"
+#include <algorithm>
 
 namespace huffman
 {
@@ -16,10 +17,8 @@ std::vector<uint32_t> countFrequencies(const std::vector<Variable>& string, cons
 {
     std::vector<uint32_t> frequencies(size);
 
-    for(const auto elem : string)
-    {
-        frequencies[elem]++;
-    }
+    std::for_each(string.begin(), string.end(), [&](const auto elem){ frequencies[elem]++; });
+
     for(const auto production : productions)
     {
         frequencies[production.body[0]]++;

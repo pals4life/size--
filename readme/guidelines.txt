@@ -1,3 +1,6 @@
+BIGDIK PERFORMACE !!!1111
+- gebruik de pstl (aka std::accumulate -> std::reduce(std::execution::par_unseq))
+
 Performance Tips
 - gebruik vector voor < 300 elementen, anders unordered_map
 - denk na over de cache

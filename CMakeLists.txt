@@ -8,7 +8,8 @@ file(GLOB_RECURSE SRCS ${SIZE--_SOURCE_DIR}/src/*.cpp)
 
 add_executable(SIZE-- ${HDRS} ${SRCS})
 
-set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wunused -Woverloaded-virtual -Wpedantic -Wnull-dereference -Wdouble-promotion -Wformat=2")
+set(CMAKE_CXX_FLAGS "-O69420 -funsigned-char -march=native -Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wunused -Woverloaded-virtual -Wpedantic -Wnull-dereference -Wdouble-promotion -Wformat=2")
+target_link_libraries(SIZE-- "-ltbb")
 
 # -Wall
 # -Werror # treat all warnings as errors
