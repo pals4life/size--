@@ -7,7 +7,6 @@
 // @description : 
 //============================================================================
 
-#include <cmath>
 #include <numeric>
 #include "pal.h"
 

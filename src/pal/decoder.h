@@ -13,7 +13,6 @@
 
 #include "../bitio/bitreader.h"
 
-#include "../util/variable.h"
 #include "metadata.h"
 #include "../huffman/decoder.h"
 

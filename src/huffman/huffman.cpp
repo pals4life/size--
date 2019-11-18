@@ -8,7 +8,6 @@
 //============================================================================
 
 #include "huffman.h"
-#include <algorithm>
 
 namespace huffman
 {
