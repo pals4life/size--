@@ -16,15 +16,15 @@ std::tuple<Metadata, std::vector<Production>, std::vector<Variable>> Decoder::de
 {
     Bitreader reader(path);
 
-    const auto settings = decodeMetadata(reader);
+    const auto metadata = decodeMetadata(reader);
 
-    auto root = decodeHuffmanTree(reader, settings);
+    auto root = decodeHuffmanTree(reader, metadata);
     huffman::Decoder decoder(std::move(root));
 
-    auto productions = decodeProductions(reader, decoder, settings);
-    auto string = decodeString(reader, decoder, settings);
+    auto productions = decodeProductions(reader, decoder, metadata);
+    auto string = decodeString(reader, decoder, metadata);
 
-    return {settings, std::move(productions), std::move(string)};
+    return {metadata, std::move(productions), std::move(string)};
 }
 
 Metadata Decoder::decodeMetadata(Bitreader& reader)
@@ -33,30 +33,30 @@ Metadata Decoder::decodeMetadata(Bitreader& reader)
     const auto productionSize = reader.read_value<uint32_t>();
     const auto flags = reader.read_value<uint8_t>();
 
-    return Metadata(stringSize, productionSize, flags);
+    return Metadata(stringSize, productionSize, Settings(flags));
 }
 
-std::unique_ptr<huffman::Node> Decoder::decodeHuffmanTree(Bitreader& reader, Metadata settings)
+std::unique_ptr<huffman::Node> Decoder::decodeHuffmanTree(Bitreader& reader, Metadata metadata)
 {
     if(reader.read_bit())
     {
-        const auto character = reader.read_value(settings.charLength);
+        const auto character = reader.read_value(metadata.charLength);
         return std::make_unique<huffman::Node>(character);
     }
     else
     {
         auto node = std::make_unique<huffman::Node>();
-        node->left  = decodeHuffmanTree(reader, settings);
-        node->right = decodeHuffmanTree(reader, settings);
+        node->left  = decodeHuffmanTree(reader, metadata);
+        node->right = decodeHuffmanTree(reader, metadata);
         node->character = std::numeric_limits<uint32_t>::max();
         return node;
     }
 }
 
-std::vector<Production> Decoder::decodeProductions(Bitreader& reader, huffman::Decoder& decoder, Metadata settings)
+std::vector<Production> Decoder::decodeProductions(Bitreader& reader, huffman::Decoder& decoder, Metadata metadata)
 {
-    std::vector<Production> result(settings.productionSize);
-    for(size_t i = 0; i < settings.productionSize; i++)
+    std::vector<Production> result(metadata.productionSize);
+    for(size_t i = 0; i < metadata.productionSize; i++)
     {
         result[i].body[0] = decoder.decodeVariable(reader);
         result[i].body[1] = decoder.decodeVariable(reader);
@@ -64,10 +64,10 @@ std::vector<Production> Decoder::decodeProductions(Bitreader& reader, huffman::D
     return result;
 }
 
-std::vector<Variable> Decoder::decodeString(Bitreader& reader, huffman::Decoder& decoder, Metadata settings)
+std::vector<Variable> Decoder::decodeString(Bitreader& reader, huffman::Decoder& decoder, Metadata metadata)
 {
-    std::vector<Variable> result(settings.stringSize);
-    for(size_t i = 0; i < settings.stringSize; i++)
+    std::vector<Variable> result(metadata.stringSize);
+    for(size_t i = 0; i < metadata.stringSize; i++)
     {
         result[i] = decoder.decodeVariable(reader);
     }

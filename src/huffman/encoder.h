@@ -18,9 +18,9 @@ namespace huffman
 
 struct Encoder
 {
-    Encoder(const std::vector<Variable>& string, const std::vector<Production>& productions, pal::Metadata settings)
+    Encoder(const std::vector<Variable>& string, const std::vector<Production>& productions, pal::Metadata metadata)
     {
-        const auto size = settings.start() + settings.productionSize;
+        const auto size = metadata.settings.offset(metadata.productionSize);
         const auto freq = countFrequencies(string, productions, size);
 
         root  = createHuffmanTree(freq);

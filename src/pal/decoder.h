@@ -14,8 +14,9 @@
 #include "../bitio/bitreader.h"
 
 #include "../util/variable.h"
-#include "metadata.h"
+#include "../util/settings.h"
 #include "../huffman/decoder.h"
+#include "metadata.h"
 
 namespace pal
 {
@@ -25,9 +26,9 @@ struct Decoder
     static std::tuple<Metadata, std::vector<Production>, std::vector<Variable>> decode(const std::filesystem::path& path);
 
     static Metadata decodeMetadata(Bitreader& reader);
-    static std::unique_ptr<huffman::Node> decodeHuffmanTree(Bitreader& reader, Metadata settings);
-    static std::vector<Production> decodeProductions(Bitreader& reader, huffman::Decoder& decoder, Metadata settings);
-    static std::vector<Variable> decodeString(Bitreader& reader, huffman::Decoder& decoder, Metadata settings);
+    static std::unique_ptr<huffman::Node> decodeHuffmanTree(Bitreader& reader, Metadata metadata);
+    static std::vector<Production> decodeProductions(Bitreader& reader, huffman::Decoder& decoder, Metadata metadata);
+    static std::vector<Variable> decodeString(Bitreader& reader, huffman::Decoder& decoder, Metadata metadata);
 };
 
 }

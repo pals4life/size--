@@ -12,25 +12,25 @@
 namespace pal
 {
 
-void Encoder::encode(const std::filesystem::path& path, const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata settings)
+void Encoder::encode(const std::filesystem::path& path, const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata metadata)
 {
-    huffman::Encoder encoder(string, productions, settings);
+    huffman::Encoder encoder(string, productions, metadata);
     Bitwriter writer(path);
 
-    encodeMetadata   (writer, settings);
-    encodeHuffmanTree(writer, encoder, settings);
+    encodeMetadata   (writer, metadata);
+    encodeHuffmanTree(writer, encoder, metadata);
     encodeProductions(writer, encoder, productions);
     encodeString     (writer, encoder, string);
 }
 
-void Encoder::encodeMetadata(Bitwriter& writer, Metadata settings)
+void Encoder::encodeMetadata(Bitwriter& writer, Metadata metadata)
 {
-    writer.write_value(settings.stringSize);
-    writer.write_value(settings.productionSize);
-    writer.write_value(settings.flags);
+    writer.write_value(metadata.stringSize);
+    writer.write_value(metadata.productionSize);
+    writer.write_value(metadata.settings.flags);
 }
 
-void Encoder::encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encoder, Metadata settings)
+void Encoder::encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encoder, Metadata metadata)
 {
     const std::function<void(Bitwriter&, const huffman::Node*, uint32_t)> recursion = [&](auto& writer, const auto* root, auto charLength) -> void
     {
@@ -47,7 +47,7 @@ void Encoder::encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encod
         }
     };
 
-    recursion(writer, encoder.root.get(), settings.charLength);
+    recursion(writer, encoder.root.get(), metadata.charLength);
 }
 
 void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Production>& productions)

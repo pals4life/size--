@@ -15,6 +15,7 @@
 
 #include "../util/variable.h"
 #include "../util/production.h"
+#include "../util/settings.h"
 
 // ik zet de bytes gewoon om naar een vector van variabelen en zonder producties
 
@@ -22,9 +23,11 @@
 
 namespace algorithm::none
 {
-    std::pair<std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
     {
         std::vector<Variable> vec(bytes.begin(), bytes.end());
-        return std::make_pair(std::move(vec), std::vector<Production>());
+        const auto settings = Settings(Settings::Flags::noflags);
+
+        return std::make_tuple(settings, std::move(vec), std::vector<Production>());
     }
 }

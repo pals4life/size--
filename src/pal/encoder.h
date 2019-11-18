@@ -12,18 +12,17 @@
 
 #include <vector>
 #include "../bitio/bitwriter.h"
-
-#include "metadata.h"
 #include "../huffman/encoder.h"
+#include "metadata.h"
 
 namespace pal
 {
     struct Encoder
     {
-        static void encode(const std::filesystem::path& path, const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata settings);
+        static void encode(const std::filesystem::path& path, const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata metadata);
 
-        static void encodeMetadata   (Bitwriter& writer, Metadata settings);
-        static void encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encoder, Metadata settings);
+        static void encodeMetadata   (Bitwriter& writer, Metadata metadata);
+        static void encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encoder, Metadata metadata);
         static void encodeProductions(Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Production>& productions);
         static void encodeString     (Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Variable>& string);
     };

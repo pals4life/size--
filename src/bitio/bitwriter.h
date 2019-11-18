@@ -47,11 +47,12 @@ public:
     template<typename Type>
     void write_value(Type value, uint8_t size) noexcept
     {
+        static_assert(std::is_integral_v<Type> and std::is_unsigned_v<Type>, "written type must be an unsigned integral");
         const auto shift = buffer_size - index;
         if(index == 64)
         {
             write_buffer();
-            buffer = static_cast<uint64_t>(value) << (buffer_size - size);
+            buffer = value << (buffer_size - size);
             index = size;
         }
         else if(index + size > buffer_size)
@@ -63,13 +64,14 @@ public:
             write_buffer();
 
             //reset buffer to num
-            buffer = static_cast<uint64_t>(value) << (buffer_size - size + shift);
+            buffer = value << (buffer_size - size + shift);
 
             // set the index
             index = size - shift;
         }
         else
         {
+
             buffer += static_cast<uint64_t>(value) << (shift - size);
             index += size;
         }

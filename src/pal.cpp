@@ -22,7 +22,7 @@ namespace pal
 
 void encode(const std::filesystem::path& input, const std::filesystem::path& output, Algorithm type)
 {
-    const auto [string, productions] = [&]()
+    const auto [settings, string, productions] = [&]()
     {
         const auto bytes = readFile(input);
         switch(type)
@@ -35,17 +35,17 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
         }
     }();
 
-    Metadata settings(string.size(), productions.size(), Metadata::Flags::noflags);
-    pal::Encoder::encode(output, string, productions, settings);
+    Metadata metadata(string.size(), productions.size(), settings);
+    pal::Encoder::encode(output, string, productions, metadata);
 }
 
 void decode(const std::filesystem::path& input, const std::filesystem::path& output)
 {
-    const auto [settings, productions, string] = Decoder::decode(input);
+    const auto [metadata, productions, string] = Decoder::decode(input);
 
     std::ofstream file(output, std::ios::binary);
     if(not file.is_open()) throw std::runtime_error("could not open file: " + output.string());
-    const auto yield = calculateYield(string, productions, settings);
+    const auto yield = calculateYield(string, productions, metadata.settings);
     file.write(reinterpret_cast<const char*>(&yield), yield.size() * sizeof(uint8_t));
 }
 
@@ -65,7 +65,7 @@ std::vector<uint8_t> readFile(const std::filesystem::path& path)
     return string;
 }
 
-std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata settings)
+std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings)
 {
     std::vector<std::string> yields(productions.size());
 
@@ -73,11 +73,11 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
     {
         const auto evaluate = [&](auto index)
         {
-            if(index < 256)
+            if(Settings::is_byte(index))
             {
                 yields[i] += index;
             }
-            else if(settings.reserved() and index < settings.start())
+            else if(settings.is_reserved_variable(index))
             {
                 yields[i] += index >> 8u;     // bits 15 - 8
                 yields[i] += index & 0x000Fu; // bits 7  - 0
@@ -94,9 +94,9 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
 
     const auto func = [&](auto base, auto index) -> size_t
     {
-        if(index < 256) return base + 1;
-        else if(settings.reserved() and index < settings.start()) return base + 2;
-        else return base + yields[index - settings.start()].size();
+        if(Settings::is_byte(index)) return base + 1;
+        else if(settings.is_reserved_variable(index)) return base + 2;
+        else return base + yields[index - settings.begin()].size();
     };
 
     const auto size = std::accumulate(string.begin(), string.end(), 0ul, func);
@@ -105,18 +105,18 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
     auto iter = result.begin();
     for(const auto index : string)
     {
-        if(index < 256)
+        if(Settings::is_byte(index))
         {
             *iter++ = index;
         }
-        else if(settings.reserved() and index < settings.start())
+        else if(settings.is_reserved_variable(index))
         {
             *iter++ = index >> 8u;
             *iter++ = index & 0x000Fu;
         }
         else
         {
-            const auto& yield = yields[index - settings.start()];
+            const auto& yield = yields[index - settings.begin()];
             iter = std::copy(yield.begin(), yield.end(), iter);
         }
     }

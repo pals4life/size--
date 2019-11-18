@@ -13,7 +13,7 @@
 #include <filesystem>
 #include <vector>
 
-#include "pal/metadata.h"
+#include "util/settings.h"
 #include "util/production.h"
 #include "algorithms/type.h"
 #include "util/variable.h"
@@ -24,5 +24,5 @@ namespace pal
     void decode(const std::filesystem::path& input, const std::filesystem::path& output);
 
     std::vector<uint8_t> readFile(const std::filesystem::path& path);
-    std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata settings);
+    std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings);
 }
