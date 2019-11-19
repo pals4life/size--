@@ -10,8 +10,11 @@
 #include "sequitur.h"
 #include <iostream>
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
-        std::vector<unsigned char> string, uint32_t base)
+        std::vector<unsigned char> string)
 {
+    Settings settings;
+
+    u_int32_t base = settings.begin();
     std::list<uint32_t> input(string.begin(), string.end());
     std::vector<Digram> digramIndex;
     std::vector<Rule> ruleIndex;
@@ -60,14 +63,14 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
                     //replace both digram instances by the new rule
                     *current = base;
 
-                        input.erase(previous);
+                    input.erase(previous);
                     previous = current;
                     previous--;
 
                     *newIt = base;
                     input.erase(newPrevIt);
 
-                    base++; // increase symbol used for next rule
+                    base; // increase symbol used for next rule
                     break;
                 }
                 newIt++;
@@ -94,5 +97,5 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
         productions.emplace_back(temp);
     }
 
-    return {Settings().begin(),variables, productions};
+    return {settings,variables, productions};
 }

@@ -48,6 +48,6 @@ namespace algorithm::sequitur
     };
 
 
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(std::vector<unsigned char> string, uint32_t base);
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(std::vector<unsigned char> string);
     // std::pair<std::vector<Variable>, std::vector<Production>>
 }
