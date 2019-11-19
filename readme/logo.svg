@@ -5,12 +5,13 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    viewBox="0 0 64 64"
    version="1.1"
    id="svg3777"
-   sodipodi:docname="image.svg"
+   sodipodi:docname="logo.svg"
    inkscape:version="0.92.4 5da689c313, 2019-01-14">
   <metadata
      id="metadata3783">
@@ -24,7 +25,29 @@
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs3781" />
+     id="defs3781">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient1206">
+      <stop
+         style="stop-color:#f000b5;stop-opacity:1;"
+         offset="0"
+         id="stop1202" />
+      <stop
+         style="stop-color:#f00000;stop-opacity:0"
+         offset="1"
+         id="stop1204" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1206"
+       id="linearGradient1210"
+       gradientUnits="userSpaceOnUse"
+       x1="32"
+       y1="63.998001"
+       x2="32"
+       y2="-34.865475" />
+  </defs>
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -38,19 +61,31 @@
      inkscape:window-height="1050"
      id="namedview3779"
      showgrid="false"
-     inkscape:zoom="9.3911152"
-     inkscape:cx="28.086358"
-     inkscape:cy="24.698639"
+     inkscape:zoom="6.6405212"
+     inkscape:cx="8.9980084"
+     inkscape:cy="43.348008"
      inkscape:window-x="15"
      inkscape:window-y="15"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g3775" />
+     inkscape:current-layer="g3775"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-paths="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-center="true"
+     inkscape:snap-text-baseline="true" />
   <g
      id="g3775"
      style="display:inline">
     <path
        d="M 10.672,0 C 9.297,0 8,1.355 8,2.789 v 58.42 c 0,1.355 1.375,2.789 2.672,2.789 h 42.656 c 1.297,0 2.672,-1.434 2.672,-2.789 v -43.21 l -18,-18 m -27.328,0"
-       style="fill:#f000b5;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       style="fill:url(#linearGradient1210);fill-opacity:1;fill-rule:nonzero;stroke:none"
        id="path3749"
        inkscape:connector-curvature="0" />
     <path
