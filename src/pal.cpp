@@ -31,7 +31,7 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
                 return algorithm::none::compress(bytes);
 
             case Algorithm::sequitur:
-                return algorithm::sequitur::compress(bytes,258);
+                return algorithm::sequitur::compress(bytes);
 
             default:
                 throw std::runtime_error("unknown algorithm");
