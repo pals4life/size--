@@ -10,4 +10,4 @@
 
 #pragma once
 
-using Variable = uint32_t;
+using Variable = u_int32_t;

@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <tuple>
 
 #include "../util/variable.h"
 #include "../util/production.h"
