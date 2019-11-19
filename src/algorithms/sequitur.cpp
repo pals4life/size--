@@ -36,7 +36,7 @@ void algorithm::sequitur::decode(const std::unordered_map<Digram, uint32_t, boos
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
         std::vector<unsigned char> string)
 {
-    Settings settings;
+    Settings settings(Settings::Flags::noflags);
 
     u_int32_t base = settings.begin();
 

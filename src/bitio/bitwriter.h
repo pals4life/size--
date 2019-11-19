@@ -12,6 +12,7 @@
 
 #include <fstream>
 #include <bitset>
+#include <iostream>
 
 class Bitwriter
 {
@@ -51,19 +52,19 @@ public:
         if(index == 64)
         {
             write_buffer();
-            buffer = value << (buffer_size - size);
+            buffer = static_cast<uint64_t>(value) << (buffer_size - size);
             index = size;
         }
         else if(index + size > buffer_size)
         {
             // shift the top bits of number into buffer
-            buffer += value >> (size - shift);
+            buffer += static_cast<uint64_t>(value) >> (size - shift);
 
             // write to buffer
             write_buffer();
 
             //reset buffer to num
-            buffer = value << (buffer_size - size + shift);
+            buffer = static_cast<uint64_t>(value) << (buffer_size - size + shift);
 
             // set the index
             index = size - shift;
