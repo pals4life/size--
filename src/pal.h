@@ -20,9 +20,9 @@
 
 namespace pal
 {
-    void encode(const std::filesystem::path& input, const std::filesystem::path& output, Algorithm type);
-    void decode(const std::filesystem::path& input, const std::filesystem::path& output);
+    void encode(const std::string& input, const std::string& output, Algorithm type);
+    void decode(const std::string& input, const std::string& output);
 
-    std::vector<uint8_t> readFile(const std::filesystem::path& path);
+    std::vector<uint8_t> readFile(const std::string& path);
     std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings);
 }
