@@ -12,7 +12,7 @@
 namespace pal
 {
 
-void Encoder::encode(const std::filesystem::path& path, const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata metadata)
+void Encoder::encode(const std::string& path, const std::vector<Variable>& string, const std::vector<Production>& productions, Metadata metadata)
 {
     huffman::Encoder encoder(string, productions, metadata);
     Bitwriter writer(path);

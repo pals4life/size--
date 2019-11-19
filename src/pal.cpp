@@ -19,7 +19,7 @@
 namespace pal
 {
 
-void encode(const std::filesystem::path& input, const std::filesystem::path& output, Algorithm type)
+void encode(const std::string& input, const std::string& output, Algorithm type)
 {
     const auto [settings, string, productions] = [&]()
     {
@@ -38,24 +38,24 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
     pal::Encoder::encode(output, string, productions, metadata);
 }
 
-void decode(const std::filesystem::path& input, const std::filesystem::path& output)
+void decode(const std::string& input, const std::string& output)
 {
     const auto [metadata, productions, string] = Decoder::decode(input);
 
     std::ofstream file(output, std::ios::binary);
-    if(not file.is_open()) throw std::runtime_error("could not open file: " + output.string());
+    if(not file.is_open()) throw std::runtime_error("could not open file: " + output);
     const auto yield = calculateYield(string, productions, metadata.settings);
     file.write(reinterpret_cast<const char*>(&yield), yield.size() * sizeof(uint8_t));
 }
 
 // ------------------------------------------------------- //
 
-std::vector<uint8_t> readFile(const std::filesystem::path& path)
+std::vector<uint8_t> readFile(const std::string& path)
 {
     auto file = fopen(path.c_str(), "rb");
-    if(not file) throw std::runtime_error("could not open file: " + path.string());
+    if(not file) throw std::runtime_error("could not open file: " + path);
     fseek(file, 0, SEEK_END);
-    auto size = static_cast<size_t>(ftell(file));
+    const auto size = static_cast<size_t>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
     std::vector<uint8_t> string(size, 0);

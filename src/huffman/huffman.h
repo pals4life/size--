@@ -14,7 +14,6 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
-#include <filesystem>
 #include <fstream>
 #include <bitset>
 
@@ -46,7 +45,7 @@ namespace huffman
     EncodingTable createEncodingTable(const std::unique_ptr<Node>& root, uint32_t size);
 
     void printEncodingTable(const EncodingTable& table);
-    void dotHuffmanTree(const std::filesystem::path& path, const std::unique_ptr<Node>& root);
+    void dotHuffmanTree(const std::string& path, const std::unique_ptr<Node>& root);
 }
 
 

@@ -23,7 +23,7 @@ namespace pal
 
 struct Decoder
 {
-    static std::tuple<Metadata, std::vector<Production>, std::vector<Variable>> decode(const std::filesystem::path& path);
+    static std::tuple<Metadata, std::vector<Production>, std::vector<Variable>> decode(const std::string& path);
 
     static Metadata decodeMetadata(Bitreader& reader);
     static std::unique_ptr<huffman::Node> decodeHuffmanTree(Bitreader& reader, Metadata metadata);

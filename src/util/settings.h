@@ -12,6 +12,7 @@
 
 #include <bitset>
 #include <cmath>
+#include <array>
 
 class Settings
 {
