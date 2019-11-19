@@ -11,7 +11,7 @@
    viewBox="0 0 64 64"
    version="1.1"
    id="svg3777"
-   sodipodi:docname="logo.svg"
+   sodipodi:docname="logo.svg.2019_11_19_14_21_30.0.svg"
    inkscape:version="0.92.4 5da689c313, 2019-01-14">
   <metadata
      id="metadata3783">
@@ -21,6 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -44,12 +45,12 @@
        id="linearGradient1210"
        gradientUnits="userSpaceOnUse"
        x1="32"
-       y1="63.998001"
-       x2="32"
-       y2="-34.865475" />
+       y1="64"
+       x2="31.77541"
+       y2="-21.833487" />
   </defs>
   <sodipodi:namedview
-     pagecolor="#ffffff"
+     pagecolor="#404552"
      bordercolor="#666666"
      borderopacity="1"
      objecttolerance="10"
@@ -57,15 +58,15 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1890"
-     inkscape:window-height="1050"
+     inkscape:window-width="1920"
+     inkscape:window-height="1080"
      id="namedview3779"
      showgrid="false"
      inkscape:zoom="6.6405212"
-     inkscape:cx="8.9980084"
-     inkscape:cy="43.348008"
-     inkscape:window-x="15"
-     inkscape:window-y="15"
+     inkscape:cx="15.774585"
+     inkscape:cy="37.324384"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="g3775"
      inkscape:snap-bbox="true"
@@ -80,6 +81,13 @@
      inkscape:snap-object-midpoints="true"
      inkscape:snap-center="true"
      inkscape:snap-text-baseline="true" />
+  <path
+     inkscape:export-ydpi="1000"
+     inkscape:export-xdpi="1000"
+     inkscape:connector-curvature="0"
+     id="path830"
+     style="fill:#c8c8c8;fill-opacity:1;fill-rule:nonzero;stroke:none"
+     d="M 10.672,-2.05e-7 C 9.2969999,-2.05e-7 7.9999999,1.3549998 7.9999999,2.7889998 V 61.209 c 0,1.355 1.375,2.789 2.6720001,2.789 H 53.328 C 54.625,63.998 56,62.564 56,61.209 V 17.999 L 38,-0.0010002 m -27.328,0" />
   <g
      id="g3775"
      style="display:inline">
@@ -87,7 +95,9 @@
        d="M 10.672,0 C 9.297,0 8,1.355 8,2.789 v 58.42 c 0,1.355 1.375,2.789 2.672,2.789 h 42.656 c 1.297,0 2.672,-1.434 2.672,-2.789 v -43.21 l -18,-18 m -27.328,0"
        style="fill:url(#linearGradient1210);fill-opacity:1;fill-rule:nonzero;stroke:none"
        id="path3749"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-xdpi="1000"
+       inkscape:export-ydpi="1000" />
     <path
        d="M 42,18 56,32 V 18 m -14,0"
        style="fill:#000000;fill-opacity:0.19599998;fill-rule:nonzero;stroke:none"
