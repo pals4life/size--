@@ -11,6 +11,7 @@
 #include "pal.h"
 
 #include "algorithms/none.h"
+#include "algorithms/sequitur.h"
 
 #include "pal/decoder.h"
 #include "pal/encoder.h"
@@ -28,6 +29,9 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
         {
             case Algorithm::none:
                 return algorithm::none::compress(bytes);
+
+            case Algorithm::sequitur:
+                return algorithm::sequitur::compress(bytes,258);
 
             default:
                 throw std::runtime_error("unknown algorithm");

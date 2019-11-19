@@ -16,6 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include <bitset>
+#include <functional>
 
 #include "../util/variable.h"
 #include "../util/production.h"
