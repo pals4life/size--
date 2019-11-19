@@ -24,10 +24,13 @@ namespace algorithm::bisection
         const auto settings = Settings();
         std::vector<Production> productions;
         std::vector<Variable> remaining;
+        remaining.reserve(bytes.size() / 2 + 1);
 
 	    for (auto it = bytes.begin(); it != bytes.end(); ++it)
 	    {
-		    remaining.emplace_back(Settings::convert_to_reserved(*it, *(++it)));
+	        const uint32_t temp0 = *it;
+	        const uint32_t temp1 = *++it;
+		    remaining.emplace_back(Settings::convert_to_reserved(temp0, temp1));
 	    }
 
         return std::make_tuple(settings, std::move(remaining), std::move(productions));

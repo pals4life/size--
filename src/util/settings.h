@@ -13,6 +13,7 @@
 #include <bitset>
 #include <cmath>
 #include <array>
+#include <iostream>
 
 class Settings
 {
@@ -28,11 +29,12 @@ public:
 
     [[nodiscard]] static uint32_t convert_to_reserved(uint32_t first, uint32_t second)
     {
-        return (first << 8u) + second;
+        return byte_end + (first << 8u) + second;
     }
     [[nodiscard]] static std::array<uint32_t, 2> convert_from_reserved(uint32_t index)
     {
-        return {index >> 8u, index & 0x000000FFu};
+        const auto temp = index - byte_end;
+        return {temp >> 8u, temp & 0x000000FFu};
     }
 
     [[nodiscard]] bool static is_reserved_rule(uint32_t first, uint32_t second)
