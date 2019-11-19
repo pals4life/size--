@@ -117,7 +117,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
     }
 
 
-    /*
+
     // decode
     std::fstream file("test-output.txt");
     for (auto c:variables)
@@ -125,6 +125,6 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
         algorithm::sequitur::decode(ruleIndex, file, c, settings.begin());
     }
     file.close();
-     */
+
     return {settings,variables, productions};
 }
