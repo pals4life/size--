@@ -14,6 +14,8 @@
 #include <numeric>
 #include <list>
 #include <fstream>
+#include <unordered_map>
+#include <boost/functional/hash.hpp>
 
 #include "../util/variable.h"
 #include "../util/production.h"
@@ -22,23 +24,7 @@
 
 namespace algorithm::sequitur
 {
-     struct Digram
-     {
-         uint32_t first;
-         uint32_t second;
-         Digram(uint32_t first, uint32_t second) : first(first), second(second) {}
-         Digram()= default;
-         Digram(const Digram &digram2)
-         {
-             first = digram2.first;
-             second = digram2.second;
-         }
-         bool operator==(const Digram &rhs)
-         {
-             return (second == rhs.second and first == rhs.first);
-         }
-
-     };
+    using Digram = std::pair<uint32_t, uint32_t>;
 
     struct Rule
     {
@@ -49,7 +35,7 @@ namespace algorithm::sequitur
     };
 
 
-    void decode(std::vector<Rule> &rules, std::fstream &file, u_int32_t c, u_int32_t begin);
+    void decode(const std::unordered_map<Digram, uint32_t, boost::hash<Digram>> &rules, u_int32_t c, u_int32_t begin);
 
     std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(std::vector<unsigned char> string);
     // std::pair<std::vector<Variable>, std::vector<Production>>
