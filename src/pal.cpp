@@ -15,6 +15,7 @@
 
 #include "pal/decoder.h"
 #include "pal/encoder.h"
+#include "algorithms/bisection.h"
 
 
 namespace pal
@@ -33,8 +34,11 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
             case Algorithm::sequitur:
                 return algorithm::sequitur::compress(bytes);
 
-            default:
-                throw std::runtime_error("unknown algorithm");
+	        case Algorithm::bisection:
+		        return algorithm::bisection::compress(bytes);
+
+	        default:
+		        throw std::runtime_error("unknown algorithm");
         }
     }();
 

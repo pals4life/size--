@@ -7,3 +7,5 @@ SIZE--
 *.gz
 *.pal
 .clangd
+.idea
+cmake-build-debug
