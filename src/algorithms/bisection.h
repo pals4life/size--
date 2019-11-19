@@ -20,11 +20,15 @@
 
 namespace algorithm::bisection
 {
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
-    {
-        std::vector<Variable> vec(bytes.begin(), bytes.end());
-        const auto settings = Settings(Settings::Flags::noflags);
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes){
+        const auto settings = Settings();
+        std::vector<Production> productions;
+        std::vector<Variable> remaining;
 
-        return std::make_tuple(settings, std::move(vec), std::vector<Production>());
+	    for (auto it = bytes.begin(); it != bytes.end(); ++it) {
+		    remaining.emplace_back(Settings::convert_to_reserved(*it, *(++it)));
+	    }
+
+        return std::make_tuple(settings, std::move(remaining), std::move(productions));
     }
 }
