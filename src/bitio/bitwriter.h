@@ -12,12 +12,11 @@
 
 #include <fstream>
 #include <bitset>
-#include <filesystem>
 
 class Bitwriter
 {
 public:
-    explicit Bitwriter(const std::filesystem::path& path)
+    explicit Bitwriter(const std::string& path)
     {
         file = std::ofstream(path, std::ios::binary);
         buffer = 0;

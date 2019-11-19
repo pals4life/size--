@@ -108,9 +108,12 @@ void printEncodingTable(const EncodingTable& table)
     }
 }
 
-void dotHuffmanTree(const std::filesystem::path& path, const std::unique_ptr<Node>& root)
+void dotHuffmanTree(const std::string& path, const std::unique_ptr<Node>& root)
 {
-    std::ofstream file(path);
+    const auto dot = path + ".dot";
+    const auto png = path + ".png";
+
+    std::ofstream file(dot);
     file << "digraph G{";
 
     uint32_t j = 10000000;
@@ -130,9 +133,8 @@ void dotHuffmanTree(const std::filesystem::path& path, const std::unique_ptr<Nod
 
     file << "}";
 
-    auto png = path;
-    png.replace_extension(".png");
-    system(("dot -Tpng " + path.string() + " -o " + png.string() + "&").c_str());
+
+    system(("dot -Tpng " + dot + " -o " + png + "&").c_str());
 }
 
 }

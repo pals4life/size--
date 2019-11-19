@@ -11,13 +11,12 @@
 #pragma once
 
 #include <fstream>
-#include <filesystem>
 #include "util.h"
 
 class Bitreader
 {
 public:
-    explicit Bitreader(const std::filesystem::path& path)
+    explicit Bitreader(const std::string& path)
     {
         file = std::ifstream(path, std::ios::binary);
         read_buffer();
