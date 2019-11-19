@@ -33,6 +33,7 @@ void algorithm::sequitur::decode(const std::unordered_map<Digram, uint32_t, boos
 
  */
 
+// TODO: nieuw gevormde digrams, rule utility, thomas adt muur afstemmen
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
         std::vector<unsigned char> string)
 {
@@ -82,5 +83,6 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
 
         current++;
     }
-    return {settings,{}, {}};
+
+    return {settings,input, {}};
 }
