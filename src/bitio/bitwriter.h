@@ -45,7 +45,7 @@ public:
     }
 
     template<typename Type>
-    void write_value(Type value, uint8_t size) noexcept
+    void write_value(Type value, uint8_t size = sizeof(Type) * 8) noexcept
     {
         static_assert(std::is_integral_v<Type> and std::is_unsigned_v<Type>, "written type must be an unsigned integral");
         const auto shift = buffer_size - index;
@@ -75,12 +75,6 @@ public:
             buffer += static_cast<uint64_t>(value) << (shift - size);
             index += size;
         }
-    }
-
-    template<typename Type>
-    void write_value(Type value) noexcept
-    {
-        write_value(value, sizeof(value) * 8);
     }
 
     void write_buffer() noexcept

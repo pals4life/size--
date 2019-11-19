@@ -25,20 +25,29 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
 {
     const auto [settings, string, productions] = [&]()
     {
-        const auto bytes = readFile(input);
-        switch(type)
+        if(type == Algorithm::none)
         {
-            case Algorithm::none:
-                return algorithm::none::compress(bytes);
-
-            case Algorithm::sequitur:
-                return algorithm::sequitur::compress(bytes);
-
-	        case Algorithm::bisection:
-		        return algorithm::bisection::compress(bytes);
-
-	        default:
-		        throw std::runtime_error("unknown algorithm");
+            const auto bytes = readBytes(input);
+            return algorithm::none::compress(bytes);
+        }
+        else if(type == Algorithm::sequitur)
+        {
+            const auto bytes = readBytes(input);
+            return algorithm::sequitur::compress(bytes);
+        }
+        else if(type == Algorithm::broken_bisection)
+        {
+            const auto bytes = readBytes(input);
+            return algorithm::broken_bisection::compress(bytes);
+        }
+        else if(type == Algorithm::bisection)
+        {
+            const auto pairs = readPairs(input);
+            return algorithm::bisection::compress(pairs);
+        }
+        else
+        {
+            throw std::runtime_error("unknown algorithm");
         }
     }();
 
@@ -59,7 +68,7 @@ void decode(const std::string& input, const std::string& output)
 
 // ------------------------------------------------------- //
 
-std::vector<uint8_t> readFile(const std::string& path)
+std::vector<uint8_t> readBytes(const std::string& path)
 {
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path);
@@ -69,6 +78,21 @@ std::vector<uint8_t> readFile(const std::string& path)
 
     std::vector<uint8_t> string(size);
     fread(string.data(), 1, size, file);
+
+    fclose(file);
+    return string;
+}
+
+std::vector<uint16_t> readPairs(const std::string& path)
+{
+    auto file = fopen(path.c_str(), "rb");
+    if(not file) throw std::runtime_error("could not open file: " + path);
+    fseek(file, 0, SEEK_END);
+    const auto size = static_cast<size_t>(ftell(file));
+    fseek(file, 0, SEEK_SET);
+
+    std::vector<uint16_t> string(1 + size / 2);
+    fread(string.data(), 2, size, file);
 
     fclose(file);
     return string;

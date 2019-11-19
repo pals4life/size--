@@ -29,12 +29,12 @@ public:
 
     [[nodiscard]] static uint32_t convert_to_reserved(uint32_t first, uint32_t second)
     {
-        return byte_end + (first << 8u) + second;
+        return byte_end + (second << 8u) + first;
     }
     [[nodiscard]] static std::array<uint32_t, 2> convert_from_reserved(uint32_t index)
     {
         const auto temp = index - byte_end;
-        return {temp >> 8u, temp & 0x000000FFu};
+        return {temp & 0x000000FFu, temp >> 8u};
     }
 
     [[nodiscard]] bool static is_reserved_rule(uint32_t first, uint32_t second)

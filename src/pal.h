@@ -22,6 +22,8 @@ namespace pal
     void encode(const std::string& input, const std::string& output, Algorithm type);
     void decode(const std::string& input, const std::string& output);
 
-    std::vector<uint8_t> readFile(const std::string& path);
+    std::vector<uint8_t> readBytes(const std::string& path);
+    std::vector<uint16_t> readPairs(const std::string& path);
+
     std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings);
 }

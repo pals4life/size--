@@ -18,7 +18,7 @@
 #include "../util/production.h"
 #include "../util/settings.h"
 
-namespace algorithm::bisection
+namespace algorithm::broken_bisection
 {
     std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes){
         const auto settings = Settings();
@@ -34,5 +34,18 @@ namespace algorithm::bisection
 	    }
 
         return std::make_tuple(settings, std::move(remaining), std::move(productions));
+    }
+}
+
+namespace algorithm::bisection
+{
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint16_t>& pairs){
+        const auto settings = Settings();
+        std::vector<Production> productions;
+
+        std::vector<Variable> variables(pairs.begin(), pairs.end());
+        std::for_each(variables.begin(), variables.end(), [](auto& elem){ elem += 256; });
+
+        return std::make_tuple(settings, std::move(variables), std::move(productions));
     }
 }

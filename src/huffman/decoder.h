@@ -18,7 +18,7 @@ namespace huffman
     {
         explicit Decoder(std::unique_ptr<Node> root) : root(std::move(root))
         {
-            dotHuffmanTree("visuals/decode", this->root);
+//            dotHuffmanTree("visuals/decode", this->root);
         }
 
         Variable decodeVariable(Bitreader& reader) const noexcept
