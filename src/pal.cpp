@@ -53,7 +53,8 @@ void decode(const std::string& input, const std::string& output)
     std::ofstream file(output, std::ios::binary);
     if(not file.is_open()) throw std::runtime_error("could not open file: " + output);
     const auto yield = calculateYield(string, productions, metadata.settings);
-    file.write(reinterpret_cast<const char*>(&yield), yield.size() * sizeof(uint8_t));
+
+    file.write(reinterpret_cast<const char*>(yield.data()), yield.size() * sizeof(uint8_t));
 }
 
 // ------------------------------------------------------- //
@@ -66,8 +67,9 @@ std::vector<uint8_t> readFile(const std::string& path)
     const auto size = static_cast<size_t>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
-    std::vector<uint8_t> string(size, 0);
+    std::vector<uint8_t> string(size);
     fread(string.data(), 1, size, file);
+
     fclose(file);
     return string;
 }
@@ -86,8 +88,9 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
             }
             else if(settings.is_reserved_variable(index))
             {
-                yields[i] += index >> 8u;     // bits 15 - 8
-                yields[i] += index & 0x000Fu; // bits 7  - 0
+                const auto [var0, var1] = Settings::convert_from_reserved(index);
+                yields[i] += var0;
+                yields[i] += var1;
             }
             else
             {
@@ -107,7 +110,7 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
     };
 
     const auto size = std::accumulate(string.begin(), string.end(), 0ul, func);
-    std::vector<uint8_t> result(size, '\000');
+    std::vector<uint8_t> result(size);
 
     auto iter = result.begin();
     for(const auto index : string)
@@ -118,8 +121,9 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
         }
         else if(settings.is_reserved_variable(index))
         {
-            *iter++ = index >> 8u;
-            *iter++ = index & 0x000Fu;
+            const auto [var0, var1] = Settings::convert_from_reserved(index);
+            *iter++ = var0;
+            *iter++ = var1;
         }
         else
         {

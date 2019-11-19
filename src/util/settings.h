@@ -24,21 +24,18 @@ public:
         variable_length = 2u,
     };
 
-    Settings(uint8_t flags = Flags::reserved) : flags(flags)
-    {
-        charLength = std::floor(std::log2(begin() + productionSize));
-    }
+    Settings(uint8_t flags = Flags::reserved) : flags(flags) {}
 
-    [[nodiscard]] uint32_t convert_to_reserved(uint32_t first, uint32_t second)
+    [[nodiscard]] static uint32_t convert_to_reserved(uint32_t first, uint32_t second)
     {
         return (first << 8u) + second;
     }
-    [[nodiscard]] std::array<uint32_t, 2> convert_from_reserved(uint32_t index)
+    [[nodiscard]] static std::array<uint32_t, 2> convert_from_reserved(uint32_t index)
     {
         return {index << 8u, index & 0x0000000Fu};
     }
 
-    [[nodiscard]] bool is_reserved_rule(uint32_t first, uint32_t second)
+    [[nodiscard]] bool static is_reserved_rule(uint32_t first, uint32_t second)
     {
         return first < byte_end and second < byte_end;
     }
@@ -77,9 +74,6 @@ public:
         return flags & variable_length;
     }
 
-    uint32_t stringSize;
-    uint32_t productionSize;
-    uint8_t charLength;
     uint8_t flags;
 
 private:
