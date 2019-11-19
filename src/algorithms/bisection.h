@@ -25,7 +25,8 @@ namespace algorithm::bisection
         std::vector<Production> productions;
         std::vector<Variable> remaining;
 
-	    for (auto it = bytes.begin(); it != bytes.end(); ++it) {
+	    for (auto it = bytes.begin(); it != bytes.end(); ++it)
+	    {
 		    remaining.emplace_back(Settings::convert_to_reserved(*it, *(++it)));
 	    }
 

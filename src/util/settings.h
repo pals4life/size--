@@ -32,7 +32,7 @@ public:
     }
     [[nodiscard]] static std::array<uint32_t, 2> convert_from_reserved(uint32_t index)
     {
-        return {index << 8u, index & 0x0000000Fu};
+        return {index >> 8u, index & 0x000000FFu};
     }
 
     [[nodiscard]] bool static is_reserved_rule(uint32_t first, uint32_t second)

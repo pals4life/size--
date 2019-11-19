@@ -26,7 +26,7 @@ struct Encoder
         root  = createHuffmanTree(freq);
         table = createEncodingTable(root, size);
 
-        dotHuffmanTree("encode", root);
+        dotHuffmanTree("visuals/encode", root);
     }
 
     void encodeVariable(Bitwriter& writer, Variable var) const
