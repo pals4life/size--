@@ -15,5 +15,6 @@ enum class Algorithm
     none,
     repair,
     sequitur,
-    sequential
+    sequential,
+    bisection
 };
