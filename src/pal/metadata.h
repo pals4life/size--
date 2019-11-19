@@ -19,7 +19,7 @@ class Metadata
 public:
     Metadata(uint32_t stringSize, uint32_t productionSize, Settings settings) : stringSize(stringSize), productionSize(productionSize), settings(settings)
     {
-        charLength = std::floor(std::log2(settings.begin() + productionSize));
+        charLength = std::floor(std::log2(settings.begin() + productionSize)) + 1;
     }
 
     uint32_t stringSize;
