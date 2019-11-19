@@ -8,7 +8,7 @@ file(GLOB_RECURSE SRCS ${SIZE--_SOURCE_DIR}/src/*.cpp)
 
 add_executable(SIZE-- ${HDRS} ${SRCS})
 
-set(CMAKE_CXX_FLAGS "-O3")
+set(CMAKE_CXX_FLAGS "")
 
 # -Wall
 # -Werror # treat all warnings as errors
