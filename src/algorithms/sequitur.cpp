@@ -60,7 +60,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
                     //replace both digram instances by the new rule
                     *current = base;
 
-                    input.erase(previous);
+                        input.erase(previous);
                     previous = current;
                     previous--;
 
