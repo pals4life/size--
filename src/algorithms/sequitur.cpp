@@ -31,7 +31,7 @@ void algorithm::sequitur::decode(std::vector<Rule> &rules, std::fstream &file, u
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
         std::vector<unsigned char> string)
 {
-    Settings settings;
+    Settings settings(Settings::Flags::noflags);
 
     u_int32_t base = settings.begin();
     std::list<uint32_t> input(string.begin(), string.end());

@@ -1,10 +1,13 @@
 #include "pal.h"
+#include <iostream>
 
 int main(int argc, char** argv)
 {
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
-    pal::encode("./beemovie.txt", "beemovie.pal", Algorithm::sequitur);
-    //pal::decode("./test.pal", "./test-decompressed.txt");
+    pal::encode("pal.txt", "pal.pal", Algorithm::sequitur);
+    pal::decode("pal.pal", "nwww.txt");
+
+//    pal::encode("photo.bmp", "photo.pal", Algorithm::sequitur);
 //    pal::decode("photo.pal", "new.bmp");
 }
