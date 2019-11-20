@@ -42,8 +42,8 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
         }
         else if(type == Algorithm::bisection)
         {
-            const auto pairs = readPairs(input);
-            return algorithm::bisection::compress(pairs);
+            const auto [pairs, odd] = readPairs(input);
+            return algorithm::bisection::compress(pairs, odd);
         }
         else
         {
@@ -83,7 +83,7 @@ std::vector<uint8_t> readBytes(const std::string& path)
     return string;
 }
 
-std::vector<uint16_t> readPairs(const std::string& path)
+std::pair<std::vector<uint16_t>, bool> readPairs(const std::string& path)
 {
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path);
@@ -91,11 +91,11 @@ std::vector<uint16_t> readPairs(const std::string& path)
     const auto size = static_cast<size_t>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
-    std::vector<uint16_t> string(1 + size / 2);
+    std::vector<uint16_t> string((size / 2) + (size % 2));
     fread(string.data(), 2, size, file);
 
     fclose(file);
-    return string;
+    return std::make_pair(std::move(string), size % 2);
 }
 
 std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings)

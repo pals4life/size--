@@ -39,12 +39,15 @@ namespace algorithm::broken_bisection
 
 namespace algorithm::bisection
 {
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint16_t>& pairs){
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint16_t>& pairs, bool odd){
         const auto settings = Settings();
         std::vector<Production> productions;
 
         std::vector<Variable> variables(pairs.begin(), pairs.end());
-        std::for_each(variables.begin(), variables.end(), [](auto& elem){ elem += 256; });
+        std::for_each(variables.begin(), variables.end() - 1, [](auto& elem){ elem += 256; });
+
+        if(not odd) variables.back() += 256;
+        else variables.back() >>= 8u;
 
         return std::make_tuple(settings, std::move(variables), std::move(productions));
     }
