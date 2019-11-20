@@ -24,16 +24,15 @@
 
 namespace algorithm::sequitur
 {
-    using Digram = std::pair<uint32_t, uint32_t>;
-
-    struct Rule
+    struct TableValue
     {
-        uint32_t head;
-        Digram body;
-
-        Rule(uint32_t head, const Digram &body): head(head), body(body) {};
+        std::vector<uint32_t>::iterator location;
+        uint32_t leftSymbol;
+        uint32_t rightSymbol;
+        TableValue(const std::vector<uint32_t> ::iterator &location, const uint32_t &left, const uint32_t &right): location(location), leftSymbol(left), rightSymbol(right) {};
+        TableValue(const std::vector<uint32_t> ::iterator &location):location(location) {};
     };
-
+    using Digram = std::pair<uint32_t, uint32_t>;
 
     void decode(const std::unordered_map<Digram, uint32_t, boost::hash<Digram>> &rules, u_int32_t c, u_int32_t begin);
 
