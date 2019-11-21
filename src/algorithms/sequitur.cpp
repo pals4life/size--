@@ -26,27 +26,13 @@ void algorithm::sequitur::decode(const std::unordered_map<Digram, uint32_t, boos
     {
         if (rule.second == c)
         {
-            decode(rules, rule.first.second, begin);
+            decode(rules, rule.first.first, begin);
             decode(rules, rule.first.second, begin);
             return;
         }
     }
 }
 
-void replaceDigram(std::vector<uint32_t>::iterator &it, const uint32_t &rule,
-        const algorithm::sequitur::Digram &digram,
-        std::map<algorithm::sequitur::Digram, std::vector<uint32_t>::iterator>::iterator &digramIt,
-        std::map<algorithm::sequitur::Digram, std::vector<uint32_t>::iterator> &digramIndex)
-{
-    // replace the digram
-    *it = rule;
-    *(it-1) = std::numeric_limits<uint32_t>::max();
-
-
-    auto tempIt = it;
-    while (*tempIt != std::numeric_limits<uint32_t>::max()) tempIt++;   // look for next symbol
-
-}
 
 std::vector<uint32_t>::iterator findPreviousSymbolIt(std::vector<uint32_t>::iterator it, const std::vector<uint32_t> &vec)
 {
@@ -187,10 +173,6 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
         current++;
     }
 
-    for (auto c:input)
-    {
-        decode(ruleIndex, c, settings.begin());
-    }
     return {settings,input, {}};
 
 }
