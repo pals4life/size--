@@ -77,11 +77,12 @@ uint32_t findNextSymbol(std::vector<uint32_t>::iterator it, const std::vector<ui
     return *it;
 }
 
-// TODO: nieuw gevormde digrams, rule utility, thomas adt muur afstemmen
+// TODO:rule utility, thomas adt muur afstemmen
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
         std::vector<unsigned char> string)
 {
     Settings settings(Settings::Flags::noflags);
+    std::vector<Production> productions;
 
     uint32_t maxVal = std::numeric_limits<uint32_t>::max();
     u_int32_t base = settings.begin();
@@ -121,8 +122,8 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
             // delete the overlapping digram
             digramIndex.erase({findPreviousSymbol(current, input), digram.first});
             // add the correct new digram
-            digramIndex.insert({{findPreviousSymbol(current, input), ruleIt->second},
-                    TableValue(current)});
+            digramIndex.try_emplace({findPreviousSymbol(current, input), ruleIt->second},
+                    TableValue(current));
 
             digramIndex.erase(digram);
 
@@ -131,6 +132,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
         else {
 
             ruleIndex[digram] = base;
+            productions.emplace_back(Production{digram.first, digram.second});
 
             uint32_t curLSymbol = findPreviousSymbol(current-1, input);
             *current = base;
@@ -140,8 +142,8 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
             // delete the overlapping digram
             digramIndex.erase({curLSymbol, digram.first});
             // add the correct new digram
-            digramIndex.insert({{curLSymbol, base},
-                                TableValue(current)});
+            digramIndex.try_emplace({curLSymbol, base},
+                                TableValue(current));
 
             uint32_t digramLSymbol = findPreviousSymbol(digramIt->second.location-1, input);
             uint32_t digramRSymbol = findNextSymbol(digramIt->second.location-1, input);
@@ -153,15 +155,15 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
             if (digramLSymbol != maxVal)
             {
                 digramIndex.erase({digramIt->first.first, digramLSymbol});
-                digramIndex.insert({{digramLSymbol, base},
-                        TableValue(current)});
+                digramIndex.try_emplace({digramLSymbol, base},
+                        TableValue(current));
             }
 
             if (digramRSymbol != maxVal)
             {
                 digramIndex.erase({digramIt->first.second, digramRSymbol});
-                digramIndex.insert({{base, digramRSymbol},
-                                    TableValue(current)});
+                digramIndex.try_emplace({base, digramRSymbol},
+                                    TableValue(current));
             }
 
 
@@ -173,113 +175,10 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
         current++;
     }
 
-    return {settings,input, {}};
+    std::vector<Variable> variables (input.size());
+    auto it = std::copy_if(input.begin(), input.end(), variables.begin(), [](uint32_t i) {return i!=std::numeric_limits<uint32_t>::max();});
+    variables.resize(std::distance(variables.begin(), it));
+
+    return std::make_tuple(std::move(settings),std::move(variables), std::move(productions));
 
 }
-/*
-std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
-        std::vector<unsigned char> string)
-{
-    Settings settings(Settings::Flags::noflags);
-
-    u_int32_t base = settings.begin();
-
-    std::unordered_map<Digram, uint32_t, boost::hash<Digram>> ruleIndex;
-    std::map<Digram, std::vector<uint32_t>::iterator> digramIndex;
-
-    std::vector<uint32_t> input(string.begin(), string.end());
-
-    auto current = input.begin() + 1;
-    while (current != input.end())
-    {
-        Digram digram = {*(current-1), *current};
-        auto digramIt = digramIndex.find(digram);
-        if (digramIt == digramIndex.end())
-        {
-            // new digram
-            digramIndex.insert({digram, current});
-            current++;
-            continue;
-        }
-        // digram overlaps
-        if (digramIt->second == current-1) {current++; continue;};
-        //check if a rule exists, if so replace the digram
-        auto ruleIt = ruleIndex.find(digram);
-        if (ruleIt != ruleIndex.end()) replaceDigram(current, ruleIt->second, digram, digramIt,digramIndex);
-            // there exists no rule for the digram, we replace both digrams by a new rule
-        else {
-            ruleIndex.insert({digram, base});
-            replaceDigram(current, base, digram,digramIt,digramIndex);
-            replaceDigram(digramIt->second, base, digram, digramIt, digramIndex);
-            base++;
-        }
-
-        current++;
-    }
-
-    for (auto c:input)
-    {
-        decode(ruleIndex, c,settings.begin());
-    }
-    return {settings,input, {}};
-}
-*/
-
-/*
-// TODO: nieuw gevormde digrams, rule utility, thomas adt muur afstemmen
-std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
-        std::vector<unsigned char> string)
-{
-    Settings settings(Settings::Flags::noflags);
-
-    uint32_t maxVal = std::numeric_limits<uint32_t>::max();
-    u_int32_t base = settings.begin();
-
-    using digramIndexValue = std::tuple<std::vector<uint32_t>::iterator, Digram, Digram>;
-    using digramIt = std::vector<Digram>::const_iterator;
-
-    std::unordered_map<Digram*, uint32_t, boost::hash<Digram*>> ruleIndex;
-    std::unordered_map<Digram , digramIndexValue , boost::hash<Digram>> digramIndex;
-    std::vector<Digram> digrams;
-
-    std::vector<uint32_t> input(maxVal, 1);
-    input.insert(input.end(),string.begin(), string.end());
-
-    auto current = input.begin() + 1;
-    while (current != input.end())
-    {
-        Digram digram = {*(current-1), *current};
-        auto digramIt = digramIndex.find(digram);
-
-        if (digramIt == digramIndex.end())
-        {
-            // new digram
-            digrams.emplace_back(digram);
-            digramIndex.insert({digrams.end(), current; {}});
-            current++;
-            continue;
-        }
-        // digram overlaps
-        if (digramIt->second == current-1) {current++; continue;};
-        //check if a rule exists, if so replace the digram
-        auto ruleIt = ruleIndex.find(digram);
-        if (ruleIt != ruleIndex.end()) replaceDigram(current, ruleIt->second, digram, digramIndex);
-            // there exists no rule for the digram, we replace both digrams by a new rule
-        else {
-            ruleIndex.insert({digram, base});
-            replaceDigram(current, base, digram, digramIndex);
-            replaceDigram(digramIt->second, base, digram, digramIndex);
-            base++;
-        }
-
-        current++;
-    }
-
-    for (auto c:input)
-    {
-        decode(ruleIndex, c,settings.begin());
-    }
-
-    return {settings,input, {}};
-}
-*/
