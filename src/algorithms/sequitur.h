@@ -27,9 +27,7 @@ namespace algorithm::sequitur
     struct TableValue
     {
         std::vector<uint32_t>::iterator location;
-        uint32_t leftSymbol;
-        uint32_t rightSymbol;
-        TableValue(const std::vector<uint32_t> ::iterator &location, const uint32_t &left, const uint32_t &right): location(location), leftSymbol(left), rightSymbol(right) {};
+        bool exists=true;
         TableValue(const std::vector<uint32_t> ::iterator &location):location(location) {};
     };
     using Digram = std::pair<uint32_t, uint32_t>;

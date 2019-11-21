@@ -83,6 +83,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
 {
     Settings settings(Settings::Flags::noflags);
     std::vector<Production> productions;
+    productions.reserve(string.size());
 
     uint32_t maxVal = std::numeric_limits<uint32_t>::max();
     u_int32_t base = settings.begin();
@@ -91,7 +92,11 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
     std::unordered_map<Digram , uint32_t, boost::hash<Digram>> ruleIndex;
 
     std::vector<uint32_t> input;
+    input.reserve(string.size());
     input.insert(input.end(),string.begin(), string.end());
+
+    digramIndex.reserve(input.size());
+    ruleIndex.reserve(input.size()/2);
 
     std::vector<uint32_t> ::iterator current = input.begin() + 1;
 
@@ -103,7 +108,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
         if (digramIt == digramIndex.end())
         {
             // new digram
-            digramIndex.insert({digram,TableValue(current)});
+            digramIndex.try_emplace(digram,TableValue(current));
             current++;
             continue;
         }
@@ -119,10 +124,11 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
             *current = ruleIt->second;
             *(findPreviousSymbolIt(current, input)) = maxVal;
 
+            auto curLSymbol = findPreviousSymbol(current, input);
             // delete the overlapping digram
-            digramIndex.erase({findPreviousSymbol(current, input), digram.first});
+            digramIndex.erase({curLSymbol, digram.first});
             // add the correct new digram
-            digramIndex.try_emplace({findPreviousSymbol(current, input), ruleIt->second},
+            digramIndex.try_emplace({curLSymbol, ruleIt->second},
                     TableValue(current));
 
             digramIndex.erase(digram);
