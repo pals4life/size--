@@ -32,8 +32,6 @@ namespace algorithm::bisection {
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
 
 		if (not odd) variables.back() += 256;
-		else variables.back() >>= 8u;
-
 
 		bool startReached = false;
 		std::unordered_map<Production, Variable> map;
@@ -47,7 +45,7 @@ namespace algorithm::bisection {
 
 			for (size_t i = 0; i < size / 2; ++i) {
 				const auto pair = map.try_emplace(Production{variables[2 * i], variables[2 * i + 1]},
-				                              settings.offset(offset));
+				                                  settings.offset(offset));
 				if (pair.second) {
 					++offset;
 					productions.emplace_back((*pair.first).first);
@@ -55,7 +53,7 @@ namespace algorithm::bisection {
 
 				variables[i] = (*pair.first).second;
 			}
-			if (uneven) variables[(size / 2)] = variables.back();
+			if (uneven) variables[(size / 2)] = variables[size-1];
 
 			size = (size / 2) + uneven;
 
