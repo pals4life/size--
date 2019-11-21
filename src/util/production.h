@@ -12,7 +12,4 @@
 
 #include <array>
 
-struct Production
-{
-    std::array<uint32_t, 2> body;
-};
+using Production = std::array<uint32_t, 2>;
