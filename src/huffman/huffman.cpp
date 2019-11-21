@@ -20,8 +20,8 @@ std::vector<uint32_t> countFrequencies(const std::vector<Variable>& string, cons
 
     for(const auto production : productions)
     {
-        frequencies[production.body[0]]++;
-        frequencies[production.body[1]]++;
+        frequencies[production[0]]++;
+        frequencies[production[1]]++;
     }
 
     return frequencies;

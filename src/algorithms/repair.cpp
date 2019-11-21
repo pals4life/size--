@@ -22,5 +22,4 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
 
     // (variable0, variable1, start index, interval length, frequency
     std::priority_queue<std::tuple<Variable, Variable, uint32_t, uint32_t, uint32_t>> queue;
-
 }

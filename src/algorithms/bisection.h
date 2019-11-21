@@ -18,37 +18,77 @@
 #include "../util/production.h"
 #include "../util/settings.h"
 
-namespace algorithm::broken_bisection
-{
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes){
-        const auto settings = Settings();
-        std::vector<Production> productions;
-        std::vector<Variable> remaining;
-        remaining.reserve(bytes.size() / 2 + 1);
+namespace algorithm::bisection {
 
-	    for (auto it = bytes.begin(); it != bytes.end(); ++it)
-	    {
-	        const uint32_t temp0 = *it;
-	        const uint32_t temp1 = *++it;
-		    remaining.emplace_back(Settings::convert_to_reserved(temp0, temp1));
-	    }
+	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
+	compress(const std::vector<uint16_t>& pairs, bool odd) {
+		const auto settings = Settings();
+		std::vector<Production> productions;
+		productions.reserve(pairs.size() / 2);
 
-        return std::make_tuple(settings, std::move(remaining), std::move(productions));
-    }
-}
+		std::vector<Variable> variables(pairs.begin(), pairs.end());
+		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
 
-namespace algorithm::bisection
-{
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint16_t>& pairs, bool odd){
-        const auto settings = Settings();
-        std::vector<Production> productions;
+		if (not odd) variables.back() += 256;
+		else variables.back() >>= 8u;
 
-        std::vector<Variable> variables(pairs.begin(), pairs.end());
-        std::for_each(variables.begin(), variables.end() - 1, [](auto& elem){ elem += 256; });
+		bool startReached = false;
+		std::unordered_map<Production, Variable> map;
+		map.reserve(pairs.size() / 2);
 
-        if(not odd) variables.back() += 256;
-        else variables.back() >>= 8u;
+		uint32_t offset = 0;
+		size_t size = variables.size();
 
-        return std::make_tuple(settings, std::move(variables), std::move(productions));
-    }
+		while (not startReached) {
+			bool uneven = size % 2 != 0;
+
+			for (size_t i = 0; i < size / 2; ++i) {
+				const auto pair = map.emplace(Production{variables[2 * i], variables[2 * i + 1]},
+				                              settings.offset(offset));
+				if (pair.second) {
+					++offset;
+					productions.emplace_back((*pair.first).first);
+				}
+
+				variables[i] = (*pair.first).second;
+			}
+			if (uneven) variables[(size / 2)] = variables.back();
+
+			size = (size / 2) + uneven;
+
+			startReached = size == 1;
+		}
+
+		variables.resize(size);
+
+//		uint32_t offset = 0;
+//		std::map<Production, std::pair<Variable, bool>> map;
+//		std::vector<Variable> newVariables;
+//
+//		for (size_t i = 0; i < variables.size() / 2; ++i) {
+//			const auto& char1 = variables.at(2 * i);
+//			const auto& char2 = variables.at(2 * i + 1);
+//			const Production production{char1, char2};
+//
+//			const auto varPointer = map.find(production);
+//
+//			if (varPointer == map.end()) {
+//				Variable var = settings.offset(offset++);
+//
+//				map.emplace(production, std::make_pair(var, false));
+//				productions.emplace_back(production);
+//
+//				newVariables.emplace_back(var);
+//			} else {
+//				(*varPointer).second.second = true;
+//
+//				newVariables.emplace_back((*varPointer).second.first);
+//			}
+//		}
+//		if (variables.size() % 2 == 1) {
+//			newVariables.emplace_back(variables.back());
+//		}
+
+		return std::make_tuple(settings, std::move(variables), std::move(productions));
+	}
 }

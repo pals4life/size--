@@ -35,11 +35,6 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
             const auto bytes = readBytes(input);
             return algorithm::sequitur::compress(bytes);
         }
-        else if(type == Algorithm::broken_bisection)
-        {
-            const auto bytes = readBytes(input);
-            return algorithm::broken_bisection::compress(bytes);
-        }
         else if(type == Algorithm::bisection)
         {
             const auto [pairs, odd] = readPairs(input);
@@ -118,12 +113,12 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
             }
             else
             {
-                yields[i] += yields[index];
+                yields[i] += yields[index - settings.begin()];
             }
         };
 
-        evaluate(productions[i].body[0]);
-        evaluate(productions[i].body[1]);
+        evaluate(productions[i][0]);
+        evaluate(productions[i][1]);
     }
 
     const auto func = [&](auto base, auto index) -> size_t
