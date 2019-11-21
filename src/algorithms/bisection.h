@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 #include <tuple>
+#include <timer>
 
 #include "../util/variable.h"
 #include "../util/production.h"
@@ -22,6 +23,7 @@ namespace algorithm::bisection {
 
 	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
 	compress(const std::vector<uint16_t>& pairs, bool odd) {
+		TimeFunction;
 		const auto settings = Settings();
 		std::vector<Production> productions;
 		productions.reserve(pairs.size() / 2);
@@ -31,6 +33,7 @@ namespace algorithm::bisection {
 
 		if (not odd) variables.back() += 256;
 		else variables.back() >>= 8u;
+
 
 		bool startReached = false;
 		std::unordered_map<Production, Variable> map;
@@ -43,7 +46,7 @@ namespace algorithm::bisection {
 			bool uneven = size % 2 != 0;
 
 			for (size_t i = 0; i < size / 2; ++i) {
-				const auto pair = map.emplace(Production{variables[2 * i], variables[2 * i + 1]},
+				const auto pair = map.try_emplace(Production{variables[2 * i], variables[2 * i + 1]},
 				                              settings.offset(offset));
 				if (pair.second) {
 					++offset;
