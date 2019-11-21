@@ -16,6 +16,7 @@
 #include "pal/decoder.h"
 #include "pal/encoder.h"
 #include "algorithms/bisection.h"
+#include "algorithms/repair.h"
 
 
 namespace pal
@@ -44,6 +45,11 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
         {
             const auto [pairs, odd] = readPairs(input);
             return algorithm::bisection::compress(pairs, odd);
+        }
+        else if(type == Algorithm::repair)
+        {
+            const auto bytes = readBytes(input);
+            return algorithm::repair::compress(bytes);
         }
         else
         {
