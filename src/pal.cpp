@@ -16,6 +16,7 @@
 #include "pal/decoder.h"
 #include "pal/encoder.h"
 #include "algorithms/bisection.h"
+#include "algorithms/repair.h"
 
 
 namespace pal
@@ -35,15 +36,15 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
             const auto bytes = readBytes(input);
             return algorithm::sequitur::compress(bytes);
         }
-        else if(type == Algorithm::broken_bisection)
-        {
-            const auto bytes = readBytes(input);
-            return algorithm::broken_bisection::compress(bytes);
-        }
         else if(type == Algorithm::bisection)
         {
-            const auto pairs = readPairs(input);
-            return algorithm::bisection::compress(pairs);
+            const auto [pairs, odd] = readPairs(input);
+            return algorithm::bisection::compress(pairs, odd);
+        }
+        else if(type == Algorithm::repair)
+        {
+            const auto bytes = readBytes(input);
+            return algorithm::repair::compress(bytes);
         }
         else
         {
@@ -83,7 +84,7 @@ std::vector<uint8_t> readBytes(const std::string& path)
     return string;
 }
 
-std::vector<uint16_t> readPairs(const std::string& path)
+std::pair<std::vector<uint16_t>, bool> readPairs(const std::string& path)
 {
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path);
@@ -91,11 +92,11 @@ std::vector<uint16_t> readPairs(const std::string& path)
     const auto size = static_cast<size_t>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
-    std::vector<uint16_t> string(1 + size / 2);
+    std::vector<uint16_t> string((size / 2) + (size % 2));
     fread(string.data(), 2, size, file);
 
     fclose(file);
-    return string;
+    return std::make_pair(std::move(string), size % 2);
 }
 
 std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings)
@@ -118,12 +119,12 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
             }
             else
             {
-                yields[i] += yields[index];
+                yields[i] += yields[index - settings.begin()];
             }
         };
 
-        evaluate(productions[i].body[0]);
-        evaluate(productions[i].body[1]);
+        evaluate(productions[i][0]);
+        evaluate(productions[i][1]);
     }
 
     const auto func = [&](auto base, auto index) -> size_t

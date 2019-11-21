@@ -16,6 +16,5 @@ enum class Algorithm
     repair,
     sequitur,
     sequential,
-    broken_bisection,
     bisection
 };

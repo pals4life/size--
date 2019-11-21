@@ -12,7 +12,13 @@
 
 #include <array>
 
-struct Production
+using Production = std::array<uint32_t, 2>;
+
+template<>
+struct std::hash<Production>
 {
-    std::array<uint32_t, 2> body;
+    std::size_t operator()(const Production& p) const noexcept
+    {
+        return (static_cast<uint64_t>(p[0]) << 32u) + p[1];
+    }
 };

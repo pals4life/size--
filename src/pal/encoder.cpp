@@ -54,8 +54,8 @@ void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encod
 {
     for(const auto production : productions)
     {
-        encoder.encodeVariable(writer, production.body[0]);
-        encoder.encodeVariable(writer, production.body[1]);
+        encoder.encodeVariable(writer, production[0]);
+        encoder.encodeVariable(writer, production[1]);
     }
 }
 

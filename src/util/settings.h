@@ -15,9 +15,8 @@
 #include <array>
 #include <iostream>
 
-class Settings
+struct Settings
 {
-public:
     enum Flags : size_t
     {
         noflags = 0u,
@@ -78,7 +77,6 @@ public:
 
     uint8_t flags;
 
-private:
     constexpr inline static uint32_t byte_end = 256;
     constexpr inline static uint32_t reserved_end = 256 + 256 * 256;
 };
