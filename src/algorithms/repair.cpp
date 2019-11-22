@@ -61,5 +61,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
              [](const auto elem, const auto shift){ return elem.first >> shift;   },
             [](const auto lhs , const auto rhs)  { return lhs.first < rhs.first; });
 
+
+
     return std::make_tuple(settings, std::move(string), std::move(productions));
 }

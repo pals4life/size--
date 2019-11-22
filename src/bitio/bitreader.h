@@ -11,6 +11,8 @@
 #pragma once
 
 #include <fstream>
+#include <iostream>
+#include <bitset>
 #include "util.h"
 
 class Bitreader
@@ -73,6 +75,7 @@ public:
     void read_buffer() noexcept
     {
         file.read(reinterpret_cast<char*>(&buffer), sizeof(buffer));
+//        std::cout << std::bitset<64>(buffer) << '\n';
     }
 
 

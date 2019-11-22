@@ -12,8 +12,9 @@
 namespace huffman
 {
 
-std::vector<uint32_t> countFrequencies(const std::vector<Variable>& string, const std::vector<Production>& productions, uint32_t size)
+std::vector<uint32_t> countFrequencies(const std::vector<Variable>& string, const std::vector<Production>& productions, pal::Metadata metadata)
 {
+    const auto size = metadata.settings.offset(metadata.productionSize);
     std::vector<uint32_t> frequencies(size);
 
     std::for_each(string.begin(), string.end(), [&](const auto elem){ frequencies[elem]++; });
@@ -27,7 +28,7 @@ std::vector<uint32_t> countFrequencies(const std::vector<Variable>& string, cons
     return frequencies;
 }
 
-std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies)
+std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies, pal::Metadata metadata)
 {
     constexpr auto compare = [](const std::unique_ptr<Node>& lhs, const std::unique_ptr<Node>& rhs)
     {
@@ -41,7 +42,7 @@ std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies
     for(size_t i = 0; i < frequencies.size(); i++)
     {
         if(frequencies[i] == 0) continue;
-        min_heap[num_elements++] = std::make_unique<Node>(i, frequencies[i]);
+        else min_heap[num_elements++] = std::make_unique<Node>(i, frequencies[i]);
     }
 
     // we need to have an exact size for the heap operations
@@ -78,8 +79,9 @@ std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies
     return std::move(min_heap.front());
 }
 
-EncodingTable createEncodingTable(const std::unique_ptr<Node>& root, uint32_t size)
+EncodingTable createEncodingTable(const std::unique_ptr<Node>& root, pal::Metadata metadata)
 {
+    const auto size = metadata.settings.offset(metadata.productionSize);
     EncodingTable result(size);
 
     // recursive lambda for epic big dick contest

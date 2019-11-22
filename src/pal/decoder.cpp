@@ -32,6 +32,8 @@ Metadata Decoder::decodeMetadata(Bitreader& reader)
     const auto stringSize = reader.read_value<uint32_t>();
     const auto productionSize = reader.read_value<uint32_t>();
     const auto flags = reader.read_value<uint8_t>();
+    const auto code = reader.read_value<uint8_t>();
+    if(code != 93u) throw std::runtime_error("file is not .pal or is corrupted");
 
     return Metadata(stringSize, productionSize, Settings(flags));
 }
@@ -58,6 +60,14 @@ std::vector<Production> Decoder::decodeProductions(Bitreader& reader, huffman::D
     std::vector<Production> result(metadata.productionSize);
     for(size_t i = 0; i < metadata.productionSize; i++)
     {
+        if(metadata.settings.has_smart_productions() )
+        {
+            if(reader.read_bit())
+            {
+                result[i] = std::array{0u, 0u};
+                continue;
+            }
+        }
         result[i][0] = decoder.decodeVariable(reader);
         result[i][1] = decoder.decodeVariable(reader);
     }

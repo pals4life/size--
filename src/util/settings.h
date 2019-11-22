@@ -22,6 +22,7 @@ struct Settings
         noflags = 0u,
         reserved = 1u,
         variable_length = 2u,
+        smart_productions = 4u
     };
 
     Settings(uint8_t flags = Flags::reserved) : flags(flags) {}
@@ -73,6 +74,10 @@ struct Settings
     [[nodiscard]] bool has_variable_length() const noexcept
     {
         return flags & variable_length;
+    }
+    [[nodiscard]] bool has_smart_productions() const noexcept
+    {
+        return flags & smart_productions;
     }
 
     uint8_t flags;

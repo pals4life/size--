@@ -1,5 +1,5 @@
 //============================================================================
-// @name        : pal.cpp
+// @name        : compressed.cpp
 // @author      : Thomas Dooms
 // @date        : 11/14/19
 // @version     : 
@@ -103,6 +103,13 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
 {
     std::vector<std::string> yields(productions.size());
 
+    const auto calcSize = [&](auto base, auto index) -> size_t
+    {
+        if (Settings::is_byte(index)) return base + 1;
+        else if (settings.is_reserved_variable(index)) return base + 2;
+        else return base + yields[index - settings.begin()].size();
+    };
+
     for(size_t i = 0; i < productions.size(); i++)
     {
         const auto evaluate = [&](auto index)
@@ -123,18 +130,12 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
             }
         };
 
+        yields[i].reserve(calcSize(calcSize(0, productions[i][0]), productions[i][1]));
         evaluate(productions[i][0]);
         evaluate(productions[i][1]);
     }
 
-    const auto func = [&](auto base, auto index) -> size_t
-    {
-        if(Settings::is_byte(index)) return base + 1;
-        else if(settings.is_reserved_variable(index)) return base + 2;
-        else return base + yields[index - settings.begin()].size();
-    };
-
-    const auto size = std::accumulate(string.begin(), string.end(), 0ul, func);
+    const auto size = std::accumulate(string.begin(), string.end(), 0ul, calcSize);
     std::vector<uint8_t> result(size);
 
     auto iter = result.begin();

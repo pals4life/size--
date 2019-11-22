@@ -20,13 +20,11 @@ struct Encoder
 {
     Encoder(const std::vector<Variable>& string, const std::vector<Production>& productions, pal::Metadata metadata)
     {
-        const auto size = metadata.settings.offset(metadata.productionSize);
-        const auto freq = countFrequencies(string, productions, size);
+        freq  = countFrequencies(string, productions, metadata);
+        root  = createHuffmanTree(freq, metadata);
+        table = createEncodingTable(root, metadata);
 
-        root  = createHuffmanTree(freq);
-        table = createEncodingTable(root, size);
-
-        dotHuffmanTree("visuals/encode", root);
+//        dotHuffmanTree("visuals/encode", root);
     }
 
     void encodeVariable(Bitwriter& writer, Variable var) const
@@ -37,6 +35,8 @@ struct Encoder
 
     std::unique_ptr<Node> root;
     EncodingTable table;
+
+    std::vector<uint32_t> freq;
 };
 
 }
