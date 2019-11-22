@@ -13,7 +13,6 @@
 #include <vector>
 #include <algorithm>
 #include <tuple>
-#include <timer>
 
 #include "../util/variable.h"
 #include "../util/production.h"
@@ -34,7 +33,7 @@ namespace algorithm::bisection {
 
 		bool startReached = false;
 		std::unordered_map<Production, Variable> map;
-		map.reserve(pairs.size() / 2);
+		map.reserve(pairs.size());
 
 		uint32_t offset = 0;
 		size_t size = variables.size();

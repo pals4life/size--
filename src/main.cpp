@@ -1,8 +1,19 @@
 #include "pal.h"
 
-int main(int argc, char** argv) {
-	const std::string file = "test/photo.bmp";
-	pal::encode(file, "test/a.pal", Algorithm::optimisedBisection);
-	pal::encode(file, "test/b.pal", Algorithm::bisection);
-//	pal::decode("test/ward_encoded.pal", "test/ward_output");
+int main(int argc, char** argv)
+{
+    pal::encode("input/chessboard.bmp", "compressed/chessboard.pal", Algorithm::bisection);
+    pal::decode("compressed/chessboard.pal", "output/chessboard.bmp");
+
+    pal::encode("input/shrek.bmp", "compressed/shrek.pal", Algorithm::none);
+    pal::decode("compressed/shrek.pal", "output/shrek.bmp");
+
+    pal::encode("input/blue.bmp", "compressed/blue.pal", Algorithm::none);
+    pal::decode("compressed/blue.pal", "output/blue.bmp");
+
+    pal::encode("input/sphere.bmp", "compressed/sphere.pal", Algorithm::none);
+    pal::decode("compressed/sphere.pal", "output/sphere.bmp");
+
+    pal::encode("input/text.txt", "compressed/text.pal", Algorithm::none);
+    pal::decode("compressed/text.pal", "output/text.txt");
 }

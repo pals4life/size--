@@ -19,7 +19,7 @@ void Encoder::encode(const std::string& path, const std::vector<Variable>& strin
 
     encodeMetadata   (writer, metadata);
     encodeHuffmanTree(writer, encoder, metadata);
-    encodeProductions(writer, encoder, productions);
+    encodeProductions(writer, encoder, productions, metadata);
     encodeString     (writer, encoder, string);
 }
 
@@ -28,6 +28,7 @@ void Encoder::encodeMetadata(Bitwriter& writer, Metadata metadata)
     writer.write_value(metadata.stringSize);
     writer.write_value(metadata.productionSize);
     writer.write_value(metadata.settings.flags);
+    writer.write_value(static_cast<uint8_t>(93u));
 }
 
 void Encoder::encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encoder, Metadata metadata)
@@ -50,12 +51,22 @@ void Encoder::encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encod
     recursion(writer, encoder.root.get(), metadata.charLength);
 }
 
-void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Production>& productions)
+void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Production>& productions, Metadata metadata)
 {
-    for(const auto production : productions)
+    for(size_t i = 0; i < productions.size(); i++)
     {
-        encoder.encodeVariable(writer, production[0]);
-        encoder.encodeVariable(writer, production[1]);
+        // if the production is not used, write a 1, else write a 0
+        if(metadata.settings.has_smart_productions() )
+        {
+            if(encoder.freq[metadata.settings.offset(i)] == 0)
+            {
+                writer.write_bit(true);
+                continue;
+            }
+            else writer.write_bit(false);
+        }
+        encoder.encodeVariable(writer, productions[i][0]);
+        encoder.encodeVariable(writer, productions[i][1]);
     }
 }
 
