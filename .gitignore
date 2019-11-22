@@ -8,6 +8,6 @@ SIZE--
 *.pal
 .clangd
 .idea
-cmake-build-debug
+cmake-build-*
 *.png
 *.dot
