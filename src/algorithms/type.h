@@ -17,5 +17,5 @@ enum class Algorithm
     sequitur,
     sequential,
     bisection,
-    optimisedBisection
+    bisectionPlusPlus
 };

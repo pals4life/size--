@@ -65,7 +65,7 @@ namespace algorithm::bisection {
 
 }
 
-namespace algorithm::optimisedBisection {
+namespace algorithm::bisectionPlusPlus {
 
 	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
 	compress(const std::vector<uint16_t>& pairs, bool odd) {

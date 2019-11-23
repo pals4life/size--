@@ -41,10 +41,10 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
             const auto [pairs, odd] = readPairs(input);
             return algorithm::bisection::compress(pairs, odd);
         }
-        else if(type == Algorithm::optimisedBisection)
+        else if(type == Algorithm::bisectionPlusPlus)
         {
             const auto [pairs, odd] = readPairs(input);
-            return algorithm::optimisedBisection::compress(pairs, odd);
+            return algorithm::bisectionPlusPlus::compress(pairs, odd);
         }
         else if(type == Algorithm::repair)
         {
