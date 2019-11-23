@@ -41,6 +41,11 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
             const auto [pairs, odd] = readPairs(input);
             return algorithm::bisection::compress(pairs, odd);
         }
+        else if(type == Algorithm::optimisedBisection)
+        {
+            const auto [pairs, odd] = readPairs(input);
+            return algorithm::optimisedBisection::compress(pairs, odd);
+        }
         else if(type == Algorithm::repair)
         {
             const auto bytes = readBytes(input);
@@ -51,6 +56,9 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
             throw std::runtime_error("unknown algorithm");
         }
     }();
+
+    std::cout << productions.size() << std::endl;
+    std::cout << string.size() << std::endl << std::endl;
 
     Metadata metadata(string.size(), productions.size(), settings);
     pal::Encoder::encode(output, string, productions, metadata);
