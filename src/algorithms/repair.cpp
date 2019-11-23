@@ -56,10 +56,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
             positions[j] = {pair, i};
         }
     }
-
-    boost::sort::spreadsort::integer_sort(positions,
-             [](const auto elem, const auto shift){ return elem.first >> shift;   },
-            [](const auto lhs , const auto rhs)  { return lhs.first < rhs.first; });
+    
 
 
 
