@@ -53,6 +53,7 @@ void Encoder::encodeHuffmanTree(Bitwriter& writer, const huffman::Encoder& encod
 
 void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Production>& productions, Metadata metadata)
 {
+    size_t count = 0;
     for(size_t i = 0; i < productions.size(); i++)
     {
         // if the production is not used, write a 1, else write a 0
@@ -60,6 +61,7 @@ void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encod
         {
             if(encoder.freq[metadata.settings.offset(i)] == 0)
             {
+                count++;
                 writer.write_bit(true);
                 continue;
             }
@@ -68,6 +70,7 @@ void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encod
         encoder.encodeVariable(writer, productions[i][0]);
         encoder.encodeVariable(writer, productions[i][1]);
     }
+    std::cout << count << " unused productions\n";
 }
 
 void Encoder::encodeString(Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Variable>& string)

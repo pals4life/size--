@@ -28,7 +28,7 @@ std::vector<uint32_t> countFrequencies(const std::vector<Variable>& string, cons
     return frequencies;
 }
 
-std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies, pal::Metadata metadata)
+std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies)
 {
     constexpr auto compare = [](const std::unique_ptr<Node>& lhs, const std::unique_ptr<Node>& rhs)
     {

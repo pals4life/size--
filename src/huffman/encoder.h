@@ -21,7 +21,7 @@ struct Encoder
     Encoder(const std::vector<Variable>& string, const std::vector<Production>& productions, pal::Metadata metadata)
     {
         freq  = countFrequencies(string, productions, metadata);
-        root  = createHuffmanTree(freq, metadata);
+        root  = createHuffmanTree(freq);
         table = createEncodingTable(root, metadata);
 
 //        dotHuffmanTree("visuals/encode", root);

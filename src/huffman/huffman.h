@@ -43,7 +43,7 @@ namespace huffman
     using EncodingTable = std::vector<std::pair<uint32_t, uint8_t>>;
 
     std::vector<uint32_t> countFrequencies(const std::vector<Variable>& string, const std::vector<Production>& productions, pal::Metadata metadata);
-    std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies, pal::Metadata metadata);
+    std::unique_ptr<Node> createHuffmanTree(const std::vector<uint32_t>& frequencies);
     EncodingTable createEncodingTable(const std::unique_ptr<Node>& root, pal::Metadata metadata);
 
     void printEncodingTable(const EncodingTable& table);
