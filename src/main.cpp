@@ -3,8 +3,8 @@
 
 int main(int argc, char** argv)
 {
-    pal::encode("input/blue.bmp", "compressed/blue.pal", Algorithm::bisection);
-    pal::decode("compressed/blue.pal", "output/blue.bmp");
+    pal::encode("input/chessboard.bmp", "compressed/chessboard.pal", Algorithm::optimisedBisection);
+    pal::decode("compressed/chessboard.pal", "output/chessboard.bmp");
 
 //    pal::encode("input/shrek.bmp", "compressed/shrek.pal", Algorithm::none);
 //    pal::decode("compressed/shrek.pal", "output/shrek.bmp");

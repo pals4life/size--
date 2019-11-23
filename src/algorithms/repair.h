@@ -104,8 +104,6 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(co
                 {
                     iter->second.second = settings.offset(index);
                     productions.emplace_back(std::array{string[i], string[i+1]});
-                    if(string[i+1] == Settings::end())
-                        std::cout << "a\n";
                     index++;
                 }
                 count++;
