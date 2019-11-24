@@ -27,7 +27,7 @@ private:
 
 	void compress();
 
-	void extract() const;
+	void extract();
 
 	void printHelp() const;
 };

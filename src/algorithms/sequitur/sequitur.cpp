@@ -127,7 +127,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::co
     {
         if (it.second.rule != limits::max()) productions.emplace_back(Production{it.first.first, it.first.second});
     }
-    return {settings.begin(), variables, {}};
+//    return std::make_tuple(settings.begin(), variables, productions);
 }
 
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(

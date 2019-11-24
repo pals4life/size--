@@ -12,8 +12,14 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 	desc.add_options()
 			("help,h", "produce this message")
 			("verbose,v", "be verbose")
-			("output,o", value<std::filesystem::path>(), "output file (optional)")
-			("create,c", value<Algorithm>(), "create a new archive with a specified algorithm: (TODO list algorithms)")
+			("output,o", value<std::filesystem::path>(), "output file/directory (optional)")
+			("create,c", value<Algorithm>(), "create a new archive with the specified algorithm (index or name):\n"
+			                                 "0 none,\n"
+			                                 "1 bisection,\n"
+			                                 "2 bisectionPlusPlus,\n"
+			                                 "3 repair,\n"
+			                                 "4 sequitur,\n"
+			                                 "5 sequential")
 			("extract,x", "extract file(s) from an archive");
 
 	options_description hidden;
@@ -36,6 +42,8 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 		}
 
 		checkOptions();
+
+		execute();
 	} catch (const error& ex) {
 		returnValue += 1;
 		std::cout << std::endl << ex.what() << "\n\n";
@@ -43,7 +51,6 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 		return;
 	}
 
-	execute();
 }
 
 void Controller::checkOptions() {
@@ -51,7 +58,7 @@ void Controller::checkOptions() {
 	if (!vm.count("files")) throw error("need at least one file to run on");
 	if (files.size() > 1) {
 		tar = true;
-		if(vm.count("extract")) throw error("only one pal archive can be extracted");
+		if (vm.count("extract")) throw error("only one pal archive can be extracted");
 	}
 	for (const auto& file: files) {
 		if (!std::filesystem::exists(file)) throw error("file '" + file.string() + "' is not found");
@@ -72,14 +79,30 @@ int Controller::getReturnValue() const {
 }
 
 void Controller::printHelp() const {
-	std::cout << "Usage: SIZE-- [options] <files>\n";
+	std::cout << "usage: SIZE-- [options] <files>\n";
 	std::cout << desc;
 }
 
 void Controller::compress() {
 	auto temp = std::filesystem::temp_directory_path() / "tempsizeminmin.tar";
 	auto in = files[0];
-	auto out = std::filesystem::path(in.string() + ".pal");
+
+	std::filesystem::path outputFile;
+	std::filesystem::path outputDirectory;
+
+	if (vm.count("output")) {
+		auto out = vm["output"].as<std::filesystem::path>();
+		if (std::filesystem::is_directory(out)) {
+			outputDirectory = out;
+			outputFile = std::filesystem::path(in.filename().string() + ".pal");
+		} else {
+			outputDirectory = out.root_directory();
+			outputFile = out.filename();
+		}
+	} else {
+		outputDirectory = ".";
+		outputFile = std::filesystem::path(in.filename().string() + ".pal");
+	}
 
 	if (tar) {
 		std::string command = "tar -cf " + temp.string();
@@ -90,25 +113,45 @@ void Controller::compress() {
 		returnValue += system(command.c_str());
 		in = temp.string();
 	}
-
-	if (vm.count("output")) out = vm["output"].as<std::filesystem::path>();
-	pal::encode(in, out, vm["create"].as<Algorithm>());
+	std::cout << outputDirectory / outputFile;
+	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), tar);
 }
 
-void Controller::extract() const {
+void Controller::extract() {
 	auto temp = std::filesystem::temp_directory_path() / "tempsizeminmin.tar";
 	auto in = files[0];
-	auto out = in;
-	out.replace_extension("");
 
-	if (vm.count("output")) out = vm["output"].as<std::filesystem::path>();
-	pal::encode(in, out, vm["create"].as<Algorithm>());
+	std::filesystem::path outputFile;
+	std::filesystem::path outputDirectory;
+
+	if (vm.count("output")) {
+		auto out = vm["output"].as<std::filesystem::path>();
+		if (std::filesystem::is_directory(out)) {
+			outputDirectory = out;
+			outputFile = in.filename();
+			if (outputFile.extension() == ".pal")
+				outputFile.replace_extension("");
+		} else {
+			outputDirectory = out.root_directory();
+			outputFile = out.filename();
+		}
+	} else {
+		outputDirectory = ".";
+		outputFile = in.filename();
+		if (outputFile.extension() == ".pal")
+			outputFile.replace_extension("");
+	}
+
+	tar = pal::decode(in, temp);
 
 	if (tar) {
-		std::string command = "tar -xf " + temp.string();
-		command += " >/dev/null 2>&1";
+		std::string command = "tar -xf " + temp.string() + " -C " + outputDirectory.string() + " >/dev/null 2>&1";
 		returnValue += system(command.c_str());
-		in = temp.string();
+		return;
 	}
+
+	std::string command =
+			"mv " + temp.string() + " " + (outputDirectory / outputFile).string() + " >/dev/null 2>&1";
+	returnValue += system(command.c_str());
 }
 
