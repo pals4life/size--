@@ -7,15 +7,17 @@
 // @description : 
 //============================================================================
 
-
 #pragma once
 
-enum class Algorithm
-{
-    none,
-    repair,
-    sequitur,
-    sequential,
-    bisection,
-    bisectionPlusPlus
+#include <istream>
+
+enum class Algorithm {
+	none,
+	bisection,
+	bisectionPlusPlus,
+	repair,
+	sequitur,
+	sequential
 };
+
+std::istream& operator>>(std::istream& in, Algorithm& algorithm);

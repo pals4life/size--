@@ -8,19 +8,17 @@
 
 using namespace boost::program_options;
 
-Controller::Controller(int argc, char** argv) : desc(options_description("Options")) {
+Controller::Controller(int argc, char** argv) : desc(options_description("options")) {
 	desc.add_options()
 			("help,h", "produce this message")
-			("create,c", "create a new archive")
-			("separate,s", "compress each file into a separate archive if multiple files are given")
-			("algorithm,a", value<std::string>(), "specify a compression algorithm (TODO list algorithms)")
-			("optimum,o", "try all algorithms and keep the most compressed archive")
 			("verbose,v", "be verbose")
+			("output,o", value<std::filesystem::path>(), "output file (optional)")
+			("create,c", value<Algorithm>(), "create a new archive with a specified algorithm: (TODO list algorithms)")
 			("extract,x", "extract file(s) from an archive");
 
 	options_description hidden;
 	hidden.add_options()
-			("files", value<std::vector<std::string>>(), "input file(s)");
+			("files", value<std::vector<std::filesystem::path>>(&files), "input file(s)");
 
 	options_description combined;
 	combined.add(desc).add(hidden);
@@ -32,10 +30,15 @@ Controller::Controller(int argc, char** argv) : desc(options_description("Option
 		store(command_line_parser(argc, argv).options(combined).positional(pos).run(), vm);
 		notify(vm);
 
+		if (vm.count("help")) {
+			printHelp();
+			return;
+		}
+
 		checkOptions();
 	} catch (const error& ex) {
-		returnValue = 1;
-		std::cout << ex.what() << "\n\n";
+		returnValue += 1;
+		std::cout << std::endl << ex.what() << "\n\n";
 		printHelp();
 		return;
 	}
@@ -43,23 +46,24 @@ Controller::Controller(int argc, char** argv) : desc(options_description("Option
 	execute();
 }
 
-void Controller::checkOptions() const {
-	if (!vm.count("files")) throw error("need at least one file to run on");
+void Controller::checkOptions() {
 	if (!(vm.count("create") ^ vm.count("extract"))) throw error("need to specify creation or extraction");
+	if (!vm.count("files")) throw error("need at least one file to run on");
+	if (files.size() > 1) {
+		tar = true;
+		if(vm.count("extract")) throw error("only one pal archive can be extracted");
+	}
+	for (const auto& file: files) {
+		if (!std::filesystem::exists(file)) throw error("file '" + file.string() + "' is not found");
+		if (std::filesystem::is_directory(file)) tar = true;
+	}
 }
 
-void Controller::execute() const {
-	if (vm.count("help")) {
-		printHelp();
-		return;
-	}
-
-	auto files = vm["files"].as<std::vector<std::string>>();
-
+void Controller::execute() {
 	if (vm.count("create")) {
-		compress(files);
+		compress();
 	} else if (vm.count("extract")) {
-		extract(files);
+		extract();
 	}
 }
 
@@ -68,17 +72,43 @@ int Controller::getReturnValue() const {
 }
 
 void Controller::printHelp() const {
+	std::cout << "Usage: SIZE-- [options] <files>\n";
 	std::cout << desc;
 }
 
-void Controller::compress(const std::vector<std::string>& files) const {
-	if (vm.count("separate") || files.size() == 1) {
+void Controller::compress() {
+	auto temp = std::filesystem::temp_directory_path() / "tempsizeminmin.tar";
+	auto in = files[0];
+	auto out = std::filesystem::path(in.string() + ".pal");
+
+	if (tar) {
+		std::string command = "tar -cf " + temp.string();
 		for (const auto& file: files) {
+			command += " " + file.string();
 		}
+		command += " >/dev/null 2>&1";
+		returnValue += system(command.c_str());
+		in = temp.string();
 	}
+
+	if (vm.count("output")) out = vm["output"].as<std::filesystem::path>();
+	pal::encode(in, out, vm["create"].as<Algorithm>());
 }
 
-void Controller::extract(const std::vector<std::string>& files) const {
+void Controller::extract() const {
+	auto temp = std::filesystem::temp_directory_path() / "tempsizeminmin.tar";
+	auto in = files[0];
+	auto out = in;
+	out.replace_extension("");
 
+	if (vm.count("output")) out = vm["output"].as<std::filesystem::path>();
+	pal::encode(in, out, vm["create"].as<Algorithm>());
+
+	if (tar) {
+		std::string command = "tar -xf " + temp.string();
+		command += " >/dev/null 2>&1";
+		returnValue += system(command.c_str());
+		in = temp.string();
+	}
 }
 

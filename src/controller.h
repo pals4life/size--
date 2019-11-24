@@ -6,6 +6,7 @@
 #define SIZE_CONTROLLER_H
 
 #include <boost/program_options.hpp>
+#include <filesystem>
 
 class Controller {
 public:
@@ -16,15 +17,17 @@ public:
 private:
 	boost::program_options::variables_map vm;
 	boost::program_options::options_description desc;
+	std::vector<std::filesystem::path> files;
+	bool tar;
 	int returnValue = 0;
 
-	void checkOptions() const;
+	void checkOptions();
 
-	void execute() const;
+	void execute();
 
-	void compress(const std::vector<std::string>& files) const;
+	void compress();
 
-	void extract(const std::vector<std::string>& files) const;
+	void extract() const;
 
 	void printHelp() const;
 };
