@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB_RECURSE HDRS ${SIZE--_SOURCE_DIR}/src/*.h  )
 file(GLOB_RECURSE SRCS ${SIZE--_SOURCE_DIR}/src/*.cpp)
 
-add_executable(SIZE-- ${HDRS} ${SRCS} src/algorithms/type.cpp)
+add_executable(SIZE-- ${HDRS} ${SRCS})
 target_link_libraries(SIZE-- boost_program_options)
 
 set(CMAKE_CXX_FLAGS "-march=native -Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wunused -Woverloaded-virtual -Wpedantic -Wnull-dereference -Wdouble-promotion -Wformat=2")

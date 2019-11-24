@@ -19,8 +19,8 @@
 
 namespace pal
 {
-    void encode(const std::string& input, const std::string& output, Algorithm type);
-    void decode(const std::string& input, const std::string& output);
+    void encode(const std::string& input, const std::string& output, Algorithm type, bool tar = false);
+    bool decode(const std::string& input, const std::string& output);
 
     std::vector<uint8_t> readBytes(const std::string& path);
     std::pair<std::vector<uint16_t>, bool> readPairs(const std::string& path);

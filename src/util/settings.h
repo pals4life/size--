@@ -22,7 +22,8 @@ struct Settings
         noflags = 0u,
         reserved = 1u,
         variable_length = 2u,
-        smart_productions = 4u
+        smart_productions = 4u,
+        tar = 8u,
     };
 
     Settings(uint8_t flags = Flags::reserved) : flags(flags) {}
@@ -50,7 +51,7 @@ struct Settings
     {
         return (flags & Flags::reserved) ? reserved_end : byte_end;
     }
-    [[nodiscard]] uint32_t end() const noexcept
+    [[nodiscard]] static uint32_t end() noexcept
     {
         return std::numeric_limits<uint32_t>::max();
     }
@@ -78,6 +79,10 @@ struct Settings
     [[nodiscard]] bool has_smart_productions() const noexcept
     {
         return flags & smart_productions;
+    }
+    [[nodiscard]] bool is_tar() const noexcept
+    {
+        return flags & tar;
     }
 
     uint8_t flags;
