@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <timer>
 #include "controller.h"
 #include "pal.h"
 
@@ -16,10 +17,11 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 			("create,c", value<Algorithm>(), "create a new archive with the specified algorithm (index or name):\n"
 			                                 "0 none,\n"
 			                                 "1 bisection,\n"
-			                                 "2 bisectionPlusPlus,\n"
-			                                 "3 repair,\n"
-			                                 "4 sequitur,\n"
-			                                 "5 sequential")
+			                                 "2 bisection++,\n"
+			                                 "3 bisection++++,\n"
+			                                 "4 repair,\n"
+			                                 "5 sequitur,\n"
+			                                 "6 sequential")
 			("extract,x", "extract file(s) from an archive");
 
 	options_description hidden;
@@ -114,7 +116,7 @@ void Controller::compress() {
 		returnValue += system(command.c_str());
 		in = temp.string();
 	}
-
+	TimeFunction;
 	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), tar);
 }
 
