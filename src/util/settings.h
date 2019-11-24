@@ -26,7 +26,7 @@ struct Settings
         tar = 8u,
     };
 
-    Settings(uint8_t flags = Flags::reserved) : flags(flags) {}
+    explicit Settings(uint8_t flags = Flags::reserved) : flags(flags) {}
 
     [[nodiscard]] static uint32_t convert_to_reserved(uint32_t first, uint32_t second)
     {

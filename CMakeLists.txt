@@ -8,7 +8,7 @@ file(GLOB_RECURSE SRCS ${SIZE--_SOURCE_DIR}/src/*.cpp)
 
 add_executable(SIZE-- ${HDRS} ${SRCS} src/algorithms/sequitur/Node.h src/algorithms/sequitur/TableValue.h)
 
-set(CMAKE_CXX_FLAGS " -march=native -Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wunused -Woverloaded-virtual -Wpedantic -Wnull-dereference -Wdouble-promotion -Wformat=2")
+set(CMAKE_CXX_FLAGS "-O3 -march=native -Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wunused -Woverloaded-virtual -Wpedantic -Wnull-dereference -Wdouble-promotion -Wformat=2")
 
 # -Wall
 # -Werror # treat all warnings as errors
