@@ -8,6 +8,7 @@
 //============================================================================
 
 #include <numeric>
+
 #include "pal.h"
 
 #include "algorithms/none.h"
@@ -22,7 +23,7 @@
 namespace pal
 {
 
-void encode(const std::string& input, const std::string& output, Algorithm type, bool tar)
+void encode(const std::filesystem::path& input, const std::filesystem::path& output, Algorithm type, bool tar)
 {
     auto [settings, string, productions] = [&]()
     {
@@ -63,12 +64,12 @@ void encode(const std::string& input, const std::string& output, Algorithm type,
     pal::Encoder::encode(output, string, productions, metadata);
 }
 
-bool decode(const std::string& input, const std::string& output)
+bool decode(const std::filesystem::path& input, const std::filesystem::path& output)
 {
     const auto [metadata, productions, string] = Decoder::decode(input);
 
     std::ofstream file(output, std::ios::binary);
-    if(not file.is_open()) throw std::runtime_error("could not open file: " + output);
+    if(not file.is_open()) throw std::runtime_error("could not open file: " + output.string());
     const auto yield = calculateYield(string, productions, metadata.settings);
 
     file.write(reinterpret_cast<const char*>(yield.data()), yield.size() * sizeof(uint8_t));
@@ -77,10 +78,10 @@ bool decode(const std::string& input, const std::string& output)
 
 // ------------------------------------------------------- //
 
-std::vector<uint8_t> readBytes(const std::string& path)
+std::vector<uint8_t> readBytes(const std::filesystem::path& path)
 {
     auto file = fopen(path.c_str(), "rb");
-    if(not file) throw std::runtime_error("could not open file: " + path);
+    if(not file) throw std::runtime_error("could not open file: " + path.string());
     fseek(file, 0, SEEK_END);
     const auto size = static_cast<size_t>(ftell(file));
     fseek(file, 0, SEEK_SET);
@@ -92,10 +93,10 @@ std::vector<uint8_t> readBytes(const std::string& path)
     return string;
 }
 
-std::pair<std::vector<uint16_t>, bool> readPairs(const std::string& path)
+std::pair<std::vector<uint16_t>, bool> readPairs(const std::filesystem::path& path)
 {
     auto file = fopen(path.c_str(), "rb");
-    if(not file) throw std::runtime_error("could not open file: " + path);
+    if(not file) throw std::runtime_error("could not open file: " + path.string());
     fseek(file, 0, SEEK_END);
     const auto size = static_cast<size_t>(ftell(file));
     fseek(file, 0, SEEK_SET);
