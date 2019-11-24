@@ -96,7 +96,8 @@ void Controller::compress() {
 			outputDirectory = out;
 			outputFile = std::filesystem::path(in.filename().string() + ".pal");
 		} else {
-			outputDirectory = out.root_directory();
+			outputDirectory = out;
+			outputDirectory.remove_filename();
 			outputFile = out.filename();
 		}
 	} else {
@@ -113,7 +114,7 @@ void Controller::compress() {
 		returnValue += system(command.c_str());
 		in = temp.string();
 	}
-	std::cout << outputDirectory / outputFile;
+
 	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), tar);
 }
 
@@ -132,7 +133,8 @@ void Controller::extract() {
 			if (outputFile.extension() == ".pal")
 				outputFile.replace_extension("");
 		} else {
-			outputDirectory = out.root_directory();
+			outputDirectory = out;
+			outputDirectory.remove_filename();
 			outputFile = out.filename();
 		}
 	} else {
