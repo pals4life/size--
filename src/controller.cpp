@@ -16,10 +16,11 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 			("create,c", value<Algorithm>(), "create a new archive with the specified algorithm (index or name):\n"
 			                                 "0 none,\n"
 			                                 "1 bisection,\n"
-			                                 "2 bisectionPlusPlus,\n"
-			                                 "3 repair,\n"
-			                                 "4 sequitur,\n"
-			                                 "5 sequential")
+			                                 "2 bisection++,\n"
+			                                 "3 bisection++++,\n"
+			                                 "4 repair,\n"
+			                                 "5 sequitur,\n"
+			                                 "6 sequential")
 			("extract,x", "extract file(s) from an archive");
 
 	options_description hidden;
@@ -96,7 +97,8 @@ void Controller::compress() {
 			outputDirectory = out;
 			outputFile = std::filesystem::path(in.filename().string() + ".pal");
 		} else {
-			outputDirectory = out.root_directory();
+			outputDirectory = out;
+			outputDirectory.remove_filename();
 			outputFile = out.filename();
 		}
 	} else {
@@ -113,7 +115,7 @@ void Controller::compress() {
 		returnValue += system(command.c_str());
 		in = temp.string();
 	}
-	std::cout << outputDirectory / outputFile;
+
 	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), tar);
 }
 
@@ -132,7 +134,8 @@ void Controller::extract() {
 			if (outputFile.extension() == ".pal")
 				outputFile.replace_extension("");
 		} else {
-			outputDirectory = out.root_directory();
+			outputDirectory = out;
+			outputDirectory.remove_filename();
 			outputFile = out.filename();
 		}
 	} else {
