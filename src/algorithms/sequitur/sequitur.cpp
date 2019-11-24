@@ -55,6 +55,7 @@ void Encoder::replaceByRule(Node *node, uint32_t rule)
     node->value = rule;
     erase(node->previous);
 }
+
 void Encoder::linkSymbol(Node* &node)
 {
     Digram digram = {node->previous->value, node->value};
@@ -66,26 +67,28 @@ void Encoder::linkSymbol(Node* &node)
         return;
     }
 
+
     else if (node->previous->previous->value == node->previous->value
             and node->value == node->previous->value)    // digram overlaps
     {
         return;
     }
 
-    if (it->second.rule != limits::max())                            // there exists a complete rule for this digram
+    if (it->second.rule != limits::max())
     {
         replaceByRule(node, it->second.rule);
     }
     else
     {
+        index.at(digram).rule = begin;
+        replaceByRule(node, begin);
+        linkSymbol(node);
 
-        it->second.rule = begin;                                // make rule
-        replaceByRule(node, begin);                         // replace current digram
-        replaceByRule(index.at(digram).node, begin);  // replace previously found digram
-
+        // previously found digram
+        replaceByRule(index.at(digram).node, begin);
         begin++;
-
     }
+
 }
 
 // TODO:rule utility, thomas adt muur afstemmen
@@ -118,9 +121,13 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::co
         node = node->next;
     }
 
-    std::vector<uint32_t> test = NodesToVector(head);
+    std::vector<Variable> variables = NodesToVector(head);
 
-    return {settings.begin(), {}, {}};
+    for (auto it:index)
+    {
+        if (it.second.rule != limits::max()) productions.emplace_back(Production{it.first.first, it.first.second});
+    }
+    return {settings.begin(), variables, {}};
 }
 
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(

@@ -35,11 +35,13 @@ namespace algorithm::sequitur
     {
         std::vector<Node> nodes;
         std::unordered_map<Digram, TableValue, boost::hash<Digram>> index;
+        std::unordered_map<Digram, uint32_t , boost::hash<Digram>> rules;
         uint32_t begin;
         Node* head;
         void erase(Node * node);
         void linkSymbol(Node* &node);
         void replaceByRule(Node* node, uint32_t rule);
+        //void checkRules(Node* node, Digram &digram);
         static std::vector<Node> vectorToNodes(const std::vector<unsigned char> &input);
         static std::vector<uint32_t> NodesToVector(Node * start);
         //void decode(const std::unordered_map<Digram, uint32_t, boost::hash<Digram>> &rules, u_int32_t c, u_int32_t begin);
