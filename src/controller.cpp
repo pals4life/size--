@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <timer>
 #include "controller.h"
 #include "pal.h"
 
@@ -116,7 +115,7 @@ void Controller::compress() {
 		returnValue += system(command.c_str());
 		in = temp.string();
 	}
-	TimeFunction;
+
 	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), tar);
 }
 

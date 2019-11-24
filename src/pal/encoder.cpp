@@ -70,7 +70,7 @@ void Encoder::encodeProductions(Bitwriter& writer, const huffman::Encoder& encod
         encoder.encodeVariable(writer, productions[i][0]);
         encoder.encodeVariable(writer, productions[i][1]);
     }
-    std::cout << count << " unused productions\n";
+//    std::cout << count << " unused productions\n";
 }
 
 void Encoder::encodeString(Bitwriter& writer, const huffman::Encoder& encoder, const std::vector<Variable>& string)
