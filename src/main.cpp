@@ -3,6 +3,6 @@
 
 int main(int argc, char** argv) {
 	Controller controller(argc, argv);
-	std::cout << controller.getReturnValue();
+	std::cout << controller.getReturnValue() << std::endl;
 	return controller.getReturnValue();
 }
