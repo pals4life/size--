@@ -22,9 +22,9 @@
 namespace pal
 {
 
-void encode(const std::string& input, const std::string& output, Algorithm type)
+void encode(const std::string& input, const std::string& output, Algorithm type, bool tar)
 {
-    const auto [settings, string, productions] = [&]()
+    auto [settings, string, productions] = [&]()
     {
         if(type == Algorithm::none)
         {
@@ -57,11 +57,13 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
         }
     }();
 
+    if(tar) settings.flags |= Settings::Flags::tar;
+
     Metadata metadata(string.size(), productions.size(), settings);
     pal::Encoder::encode(output, string, productions, metadata);
 }
 
-void decode(const std::string& input, const std::string& output)
+bool decode(const std::string& input, const std::string& output)
 {
     const auto [metadata, productions, string] = Decoder::decode(input);
 
@@ -70,6 +72,7 @@ void decode(const std::string& input, const std::string& output)
     const auto yield = calculateYield(string, productions, metadata.settings);
 
     file.write(reinterpret_cast<const char*>(yield.data()), yield.size() * sizeof(uint8_t));
+    return metadata.settings.is_tar();
 }
 
 // ------------------------------------------------------- //
