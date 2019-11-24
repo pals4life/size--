@@ -50,7 +50,7 @@ struct Settings
     {
         return (flags & Flags::reserved) ? reserved_end : byte_end;
     }
-    [[nodiscard]] uint32_t end() const noexcept
+    [[nodiscard]] static uint32_t end() noexcept
     {
         return std::numeric_limits<uint32_t>::max();
     }

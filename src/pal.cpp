@@ -57,9 +57,6 @@ void encode(const std::string& input, const std::string& output, Algorithm type)
         }
     }();
 
-    std::cout << productions.size() << std::endl;
-    std::cout << string.size() << std::endl << std::endl;
-
     Metadata metadata(string.size(), productions.size(), settings);
     pal::Encoder::encode(output, string, productions, metadata);
 }
