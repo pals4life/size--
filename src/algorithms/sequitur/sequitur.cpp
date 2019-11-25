@@ -61,42 +61,91 @@ void Encoder::linkSymbol(Node* &node)
     Digram digram = {node->previous->value, node->value};
     auto it = index.find(digram);
 
-    if (it == index.end())                                      // digram does not exists
+    if (digram.first == 97 and digram.second == 97)
+    {
+        int a = 0;
+    }
+    if (rules.find(digram) != rules.end())
+    {
+        if (node->previous->previous != nullptr) index.erase(std::make_pair(node->previous->previous->value, digram.first));
+        replaceByRule(node, rules.at(digram));
+        linkSymbol(node);
+    }
+
+    else if (it == index.end())                                      // digram does not exists
     {
         index.try_emplace(std::move(digram), TableValue(node, limits::max()));
         return;
     }
 
-
-    else if (node->previous->previous->value == node->previous->value
-            and node->value == node->previous->value)    // digram overlaps
+    else if (index.at(digram).node == node)
     {
         return;
     }
-
-    if (it->second.rule != limits::max())
+    else if (index.at(digram).node == node->previous)    // digram overlaps
     {
-        replaceByRule(node, it->second.rule);
+        return;
     }
     else
     {
-        index.at(digram).rule = begin;
-        replaceByRule(node, begin);
-        linkSymbol(node);
+        rules[digram] = begin;
+        productions.emplace_back(Production{digram.first, digram.second});
+        Node * location = index.at(digram).node;
+
+        index.erase(digram);
+        if (node->previous->previous != nullptr) index.erase(std::make_pair(node->previous->previous->value, digram.first));
+        if (location->previous->previous != nullptr) index.erase(std::make_pair(location->previous->previous->value, digram.first));
+        index.erase(std::make_pair(digram.second, location->next->value));
 
         // previously found digram
-        replaceByRule(index.at(digram).node, begin);
+        replaceByRule(node, begin);
+        replaceByRule(location, begin);
+
+
+        if (location->previous != nullptr)
+        {
+            linkSymbol(location);
+        }
+        if (location->next != nullptr)
+        {
+            linkSymbol(location->next);
+        }
+
+        linkSymbol(node);
         begin++;
     }
 
 }
 
+void Encoder::decode(uint32_t c, uint32_t begin)
+{
+    if (c < begin)
+    {
+        if (char(c)=='.');
+        {
+            int a = 0;
+        }
+        std::cout << char(c) << std::flush;
+        return;
+    }
+    else
+    {
+        for (auto rule:rules)
+        {
+            if (rule.second == c)
+            {
+                decode(rule.first.first, begin);
+                decode(rule.first.second, begin);
+                return;
+            }
+        }
+    }
+}
 // TODO:rule utility, thomas adt muur afstemmen
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::compress(
         std::vector<unsigned char> string)
 {
     Settings settings(Settings::Flags::noflags);
-    std::vector<Production> productions;
     productions.reserve(string.size());
 
     begin = settings.begin();
@@ -123,17 +172,13 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::co
 
     std::vector<Variable> variables = NodesToVector(head);
 
-    for (auto it:index)
-    {
-        if (it.second.rule != limits::max()) productions.emplace_back(Production{it.first.first, it.first.second});
-    }
-//    return std::make_tuple(settings.begin(), variables, productions);
+    return std::make_tuple(settings, std::move(variables), std::move(productions));
 }
 
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::sequitur::compress(
         std::vector<unsigned char> string)
 {
-    return Encoder().compress(string);
+    return Encoder().compress(std::move(string));
 }
 /*
  *
