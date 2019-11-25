@@ -18,6 +18,7 @@
 #include "pal/encoder.h"
 #include "algorithms/bisection.h"
 #include "algorithms/repair.h"
+#include "algorithms/lzw.h"
 
 
 namespace pal
@@ -51,6 +52,11 @@ void encode(const std::experimental::filesystem::path& input, const std::experim
         {
             const auto [pairs, odd] = readPairs(input);
             return algorithm::bisectionPlusPlusPlusPlus::compress(pairs, odd);
+        }
+        else if (type == Algorithm::lzw)
+        {
+            const auto bytes = readBytes(input);
+            return algorithm::lzw::compress(bytes);
         }
         else if(type == Algorithm::repair)
         {

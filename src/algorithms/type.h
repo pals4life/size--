@@ -18,6 +18,7 @@ enum class Algorithm {
 	bisectionPlusPlusPlusPlus,
 	repair,
 	sequitur,
+	lzw,
 	sequential
 };
 
