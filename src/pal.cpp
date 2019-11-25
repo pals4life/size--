@@ -23,7 +23,7 @@
 namespace pal
 {
 
-void encode(const std::filesystem::path& input, const std::filesystem::path& output, Algorithm type, bool tar)
+void encode(const std::experimental::filesystem::path& input, const std::experimental::filesystem::path& output, Algorithm type, bool tar)
 {
     auto [settings, string, productions] = [&]()
     {
@@ -69,7 +69,7 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
     pal::Encoder::encode(output, string, productions, metadata);
 }
 
-bool decode(const std::filesystem::path& input, const std::filesystem::path& output)
+bool decode(const std::experimental::filesystem::path& input, const std::experimental::filesystem::path& output)
 {
     const auto [metadata, productions, string] = Decoder::decode(input);
 
@@ -83,7 +83,7 @@ bool decode(const std::filesystem::path& input, const std::filesystem::path& out
 
 // ------------------------------------------------------- //
 
-std::vector<uint8_t> readBytes(const std::filesystem::path& path)
+std::vector<uint8_t> readBytes(const std::experimental::filesystem::path& path)
 {
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path.string());
@@ -98,7 +98,7 @@ std::vector<uint8_t> readBytes(const std::filesystem::path& path)
     return string;
 }
 
-std::pair<std::vector<uint16_t>, bool> readPairs(const std::filesystem::path& path)
+std::pair<std::vector<uint16_t>, bool> readPairs(const std::experimental::filesystem::path& path)
 {
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path.string());
