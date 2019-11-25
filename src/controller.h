@@ -7,7 +7,6 @@
 
 #include <boost/program_options.hpp>
 #include <experimental/filesystem>
-
 class Controller {
 public:
 	Controller(int argc, char** argv);
