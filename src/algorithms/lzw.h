@@ -11,15 +11,19 @@
 #include <vector>
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
+#include <experimental/filesystem>
+#include <tuple>
 
 #include "../util/variable.h"
 #include "../util/production.h"
 #include "../util/settings.h"
-#include <tuple>
+#include "../bitio/bitreader.h"
+#include "../bitio/bitwriter.h"
 
 namespace algorithm::lzw
 {
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
+    void compress(const std::vector<uint8_t>& bytes,
+            const std::experimental::filesystem::path& output)
     {
         std::string input, x, y;
         input.reserve(bytes.size());
@@ -48,7 +52,8 @@ namespace algorithm::lzw
         }
         variables.emplace_back(table[x]);
 
-        return {settings, std::move(variables), {}};
+        Bitwriter writer(output);
+        return;
     }
 }
 
