@@ -22,13 +22,10 @@
 
 namespace algorithm::lzw
 {
-    void compress(const std::vector<uint8_t>& bytes,
+    void compress(const std::vector<uint8_t>& input,
             const std::experimental::filesystem::path& output)
     {
-        std::string input, x, y;
-        input.reserve(bytes.size());
-        for (auto c:bytes) input += std::string(1, c);
-
+        std::string x, y;
         std::vector<Variable> variables;
         std::unordered_map<std::string, uint32_t> table;
         for (uint32_t i=0;i<256;i++) table[std::string(1, i)] = i;
@@ -38,9 +35,9 @@ namespace algorithm::lzw
         value = 256;
 
         x = input[0];
-        for (int i = 0; i < input.length(); i++)
+        for (int i = 0; i < input.size(); i++)
         {
-            if (i < input.length()-1) y = input[i+1];
+            if (i < input.size()-1) y = input[i+1];
             if (table.find(x+y) != table.end()) x += y;
             else {
                 table[x+y] = value;
