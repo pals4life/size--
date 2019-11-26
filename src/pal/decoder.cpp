@@ -12,7 +12,7 @@
 namespace pal
 {
 
-std::tuple<Metadata, std::vector<Production>, std::vector<Variable>> Decoder::decode(const std::string& path)
+std::tuple<Metadata, std::vector<Production>, std::vector<Variable>> Decoder::decode(const std::filesystem::path& path)
 {
     Bitreader reader(path);
 

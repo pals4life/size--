@@ -12,7 +12,7 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 	desc.add_options()
 			("help,h", "produce this message")
 			("verbose,v", "be verbose")
-			("output,o", value<std::experimental::filesystem::path>(), "output file/directory (optional)")
+			("output,o", value<std::filesystem::path>(), "output file/directory (optional)")
 			("create,c", value<Algorithm>(), "create a new archive with the specified algorithm (index or name):\n"
 			                                 "0 none,\n"
 			                                 "1 bisection,\n"
@@ -26,7 +26,7 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 
 	options_description hidden;
 	hidden.add_options()
-			("files", value<std::vector<std::experimental::filesystem::path>>(&files), "input file(s)");
+			("files", value<std::vector<std::filesystem::path>>(&files), "input file(s)");
 
 	options_description combined;
 	combined.add(desc).add(hidden);
@@ -63,8 +63,8 @@ void Controller::checkOptions() {
 		if (vm.count("extract")) throw error("only one pal archive can be extracted");
 	}
 	for (const auto& file: files) {
-		if (!std::experimental::filesystem::exists(file)) throw error("file '" + file.string() + "' is not found");
-		if (std::experimental::filesystem::is_directory(file)) tar = true;
+		if (!std::filesystem::exists(file)) throw error("file '" + file.string() + "' is not found");
+		if (std::filesystem::is_directory(file)) tar = true;
 	}
 }
 
@@ -86,17 +86,17 @@ void Controller::printHelp() const {
 }
 
 void Controller::compress() {
-	auto temp = std::experimental::filesystem::temp_directory_path() / "tempsizeminmin.tar";
+	auto temp = std::filesystem::temp_directory_path() / "tempsizeminmin.tar";
 	auto in = files[0];
 
-	std::experimental::filesystem::path outputFile;
-	std::experimental::filesystem::path outputDirectory;
+	std::filesystem::path outputFile;
+	std::filesystem::path outputDirectory;
 
 	if (vm.count("output")) {
-		auto out = vm["output"].as<std::experimental::filesystem::path>();
-		if (std::experimental::filesystem::is_directory(out)) {
+		auto out = vm["output"].as<std::filesystem::path>();
+		if (std::filesystem::is_directory(out)) {
 			outputDirectory = out;
-			outputFile = std::experimental::filesystem::path(in.filename().string() + ".pal");
+			outputFile = std::filesystem::path(in.filename().string() + ".pal");
 		} else {
 			outputDirectory = out;
 			outputDirectory.remove_filename();
@@ -104,7 +104,7 @@ void Controller::compress() {
 		}
 	} else {
 		outputDirectory = ".";
-		outputFile = std::experimental::filesystem::path(in.filename().string() + ".pal");
+		outputFile = std::filesystem::path(in.filename().string() + ".pal");
 	}
 
 	if (tar) {
@@ -117,19 +117,21 @@ void Controller::compress() {
 		in = temp.string();
 	}
 
+
+
 	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), tar);
 }
 
 void Controller::extract() {
-	auto temp = std::experimental::filesystem::temp_directory_path() / "tempsizeminmin.tar";
+	auto temp = std::filesystem::temp_directory_path() / "tempsizeminmin.tar";
 	auto in = files[0];
 
-	std::experimental::filesystem::path outputFile;
-	std::experimental::filesystem::path outputDirectory;
+	std::filesystem::path outputFile;
+	std::filesystem::path outputDirectory;
 
 	if (vm.count("output")) {
-		auto out = vm["output"].as<std::experimental::filesystem::path>();
-		if (std::experimental::filesystem::is_directory(out)) {
+		auto out = vm["output"].as<std::filesystem::path>();
+		if (std::filesystem::is_directory(out)) {
 			outputDirectory = out;
 			outputFile = in.filename();
 			if (outputFile.extension() == ".pal")

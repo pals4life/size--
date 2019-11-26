@@ -6,7 +6,7 @@
 #define SIZE_CONTROLLER_H
 
 #include <boost/program_options.hpp>
-#include <experimental/filesystem>
+#include <filesystem>
 class Controller {
 public:
 	Controller(int argc, char** argv);
@@ -16,7 +16,7 @@ public:
 private:
 	boost::program_options::variables_map vm;
 	boost::program_options::options_description desc;
-	std::vector<std::experimental::filesystem::path> files;
+	std::vector<std::filesystem::path> files;
 	bool tar;
 	bool verbose;
 	int returnValue = 0;

@@ -13,13 +13,13 @@
 #include <fstream>
 #include <iostream>
 #include <bitset>
-#include <experimental/filesystem>
+#include <filesystem>
 #include "util.h"
 
 class Bitreader
 {
 public:
-    explicit Bitreader(const std::experimental::filesystem::path& path)
+    explicit Bitreader(const std::filesystem::path& path)
     {
         file = std::ifstream(path, std::ios::binary);
         read_buffer();

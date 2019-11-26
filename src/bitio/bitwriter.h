@@ -13,12 +13,12 @@
 #include <fstream>
 #include <bitset>
 #include <iostream>
-#include <experimental/filesystem>
+#include <filesystem>
 
 class Bitwriter
 {
 public:
-    explicit Bitwriter(const std::experimental::filesystem::path& path)
+    explicit Bitwriter(const std::filesystem::path& path)
     {
         file = std::ofstream(path, std::ios::binary);
         buffer = 0;
@@ -82,6 +82,11 @@ public:
     {
 //        std::cout << std::bitset<64>(buffer) << '\n';
         file.write(reinterpret_cast<char*>(&buffer), sizeof(buffer));
+    }
+
+    auto& get_file()
+    {
+        return file;
     }
 
 private:

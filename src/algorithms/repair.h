@@ -47,11 +47,12 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(co
     // we use this scope so our vectors do not persist through the rest of the function
     // in this pass we quickly go through the bytes and pair the most frequent pairs in an efficient way
     // we make no "new" productions because we reserve the variables.
+
     Utils::Timer::start();
     if(prepass)
     {
         // define the number of pairs that must occur before we change them
-        std::array<uint32_t, byte_pairs> frequencies{}; // more magic numbers
+        std::vector<uint32_t> frequencies(byte_pairs);
 
         for(size_t i = 0; i < bytes.size() - 1; i++)
         {
@@ -135,6 +136,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(co
     Utils::Timer::end();
 
     std::cout << "used " << productions.size() << " productions\n";
+
 
     return std::make_tuple(settings, std::move(string), std::move(productions));
 }
