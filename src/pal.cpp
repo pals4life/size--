@@ -26,12 +26,6 @@ namespace pal
 
 void encode(const std::experimental::filesystem::path& input, const std::experimental::filesystem::path& output, Algorithm type, bool tar)
 {
-    if (type == Algorithm::lzw)
-    {
-        const auto bytes = readBytes(input);
-        algorithm::lzw::compress(bytes, output);
-        return;
-    }
 
     auto [settings, string, productions] = [&]()
     {
@@ -59,6 +53,11 @@ void encode(const std::experimental::filesystem::path& input, const std::experim
         {
             const auto [pairs, odd] = readPairs(input);
             return algorithm::bisectionPlusPlusPlusPlus::compress(pairs, odd);
+        }
+        else if(type == Algorithm::lzw)
+        {
+            algorithm::lzw::compress(input, output);
+            exit(0);
         }
         else if(type == Algorithm::repair)
         {

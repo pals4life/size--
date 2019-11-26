@@ -13,44 +13,67 @@
 #include <boost/functional/hash.hpp>
 #include <experimental/filesystem>
 #include <tuple>
+#include <fstream>
 
 #include "../util/variable.h"
 #include "../util/production.h"
 #include "../util/settings.h"
+#include "../util/settings.h"
 #include "../bitio/bitreader.h"
 #include "../bitio/bitwriter.h"
+#include "../pal/metadata.h"
 
 namespace algorithm::lzw
 {
-    void compress(const std::vector<uint8_t>& input,
+
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(
+            const std::experimental::filesystem::path& input,
             const std::experimental::filesystem::path& output)
     {
-        std::string x, y;
-        std::vector<Variable> variables;
-        std::unordered_map<std::string, uint32_t> table;
-        for (uint32_t i=0;i<256;i++) table[std::string(1, i)] = i;
 
+
+        // write metadata
         Settings settings;
-        uint32_t value = settings.begin();
-        value = 256;
-
-        x = input[0];
-        for (int i = 0; i < input.size(); i++)
-        {
-            if (i < input.size()-1) y = input[i+1];
-            if (table.find(x+y) != table.end()) x += y;
-            else {
-                table[x+y] = value;
-                variables.emplace_back(table.at(x));
-                value++;
-                x = y;
-            }
-            y = "";
-        }
-        variables.emplace_back(table[x]);
-
+        /*
+        pal::Metadata metadata( , 0, settings);
         Bitwriter writer(output);
-        return;
+        pal::Encoder::encodeMetadata(writer, metadata);
+        */
+
+        // read input
+        std::ifstream inputFile (input);
+        if(not inputFile.is_open()) throw std::runtime_error("could not open file: " + output.string());
+        std::ifstream outputFile (output);
+        char c;
+        inputFile.get(c);
+
+        std::vector<Variable> variables;
+        std::unordered_map<std::pair<uint16_t,uint16_t>, uint16_t, boost::hash<std::pair<uint16_t , uint16_t>>> table;
+        table.reserve(4096);
+        for (uint16_t i=0;i<256;i++) table[std::make_pair(i, 0)] = i;
+
+
+        uint16_t value = settings.begin();
+        uint16_t x = c;
+
+        //compress
+        while (inputFile.get(c))
+        {
+            auto pair = std::make_pair(x, c);
+            auto it = table.find(pair);
+            if (it != table.end())
+            {
+                x = it->second;
+            }
+            else {
+                table[pair] = value;
+                //outputFile << x;
+                value++;
+                x = c;
+            }
+        }
+        //outputFile << x;
+        return std::make_tuple(settings, std::vector<Variable>(), std::vector<Production>());
     }
 }
 
