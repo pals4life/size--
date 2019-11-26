@@ -18,6 +18,21 @@
 #include "../util/production.h"
 #include "../util/settings.h"
 
+template<uint8_t MAX>
+class Counter {
+public:
+	void operator++() {
+		if (count != MAX) ++count;
+	}
+
+	bool operator()() const {
+		return count == MAX;
+	}
+
+private:
+	uint8_t count = 0;
+};
+
 namespace algorithm::bisection {
 
 	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
@@ -73,10 +88,10 @@ namespace algorithm::bisectionPlusPlus {
 
 		std::vector<Production> productions;
 		std::unordered_map<Production, Variable> map;
-		std::vector<bool> used;
+		std::vector<Counter<4>> counters;
 		productions.reserve(pairs.size() / 2);
 		map.reserve(pairs.size() / 2);
-		used.reserve(pairs.size() / 2);
+		counters.reserve(pairs.size() / 2);
 
 		std::vector<Variable> variables(pairs.begin(), pairs.end());
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
@@ -97,7 +112,7 @@ namespace algorithm::bisectionPlusPlus {
 				// enkel variabelen van vorige level die kunnen herhaald worden
 				if (size != variables.size()) {
 					if (var1 < previousLevelBegin || var2 < previousLevelBegin ||
-					    !used[var1 - settings.begin()] || !used[var2 - settings.begin()]) {
+					    !counters[var1 - settings.begin()]() || !counters[var2 - settings.begin()]()) {
 						variables[index++] = var1;
 						variables[index++] = var2;
 						continue;
@@ -108,9 +123,9 @@ namespace algorithm::bisectionPlusPlus {
 				if (pair.second) {
 					++offset;
 					productions.emplace_back((*pair.first).first);
-					used.emplace_back(false);
+					counters.emplace_back(Counter<4>());
 				} else {
-					used[(*pair.first).second - settings.begin()] = true;
+					++counters[(*pair.first).second - settings.begin()];
 				}
 				variables[index++] = (*pair.first).second;
 			}
@@ -136,10 +151,10 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 
 		std::vector<Production> productions;
 		std::unordered_map<Production, Variable> map;
-		std::unordered_map<Production, bool> used;
+		std::unordered_map<Production, Counter<4>> counters;
 		productions.reserve(pairs.size() / 2);
 		map.reserve(pairs.size() / 2);
-		used.reserve(pairs.size() / 2);
+		counters.reserve(pairs.size() / 2);
 
 		std::vector<Variable> variables(pairs.begin(), pairs.end());
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
@@ -157,9 +172,9 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 				const auto& var1 = variables[2 * i];
 				const auto& var2 = variables[2 * i + 1];
 
-				const auto pair = used.try_emplace(Production{var1, var2}, false);
+				const auto pair = counters.try_emplace(Production{var1, var2}, Counter<4>());
 				if (!pair.second) {
-					(*pair.first).second = true;
+					++((*pair.first).second);
 				}
 			}
 
@@ -168,7 +183,7 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 				const auto& var2 = variables[2 * i + 1];
 
 				// enkel variabelen van vorige level die kunnen herhaald worden
-				if (var1 < previousLevelBegin || var2 < previousLevelBegin || !used[{var1, var2}]) {
+				if (var1 < previousLevelBegin || var2 < previousLevelBegin || !counters[{var1, var2}]()) {
 					variables[index++] = var1;
 					variables[index++] = var2;
 					continue;

@@ -18,8 +18,8 @@ enum class Algorithm {
 	bisectionPlusPlusPlusPlus,
 	repair,
 	sequitur,
+	sequential,
 	lzw,
-	sequential
 };
 
 std::istream& operator>>(std::istream& in, Algorithm& algorithm);

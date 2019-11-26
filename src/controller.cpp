@@ -20,7 +20,8 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 			                                 "3 bisection++++,\n"
 			                                 "4 repair,\n"
 			                                 "5 sequitur,\n"
-			                                 "6 sequential")
+			                                 "6 sequential\n"
+			                                 "7 LZW")
 			("extract,x", "extract file(s) from an archive");
 
 	options_description hidden;
