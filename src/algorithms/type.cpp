@@ -23,6 +23,8 @@ std::istream& operator>>(std::istream& in, Algorithm& algorithm) {
 		algorithm = Algorithm::sequitur;
 	else if (token == "6" || token == "sequential")
 		algorithm = Algorithm::sequential;
+	else if (token == "7" || token == "lzw")
+		algorithm = Algorithm::lzw;
 	else
 		in.setstate(std::ios_base::failbit);
 	return in;
