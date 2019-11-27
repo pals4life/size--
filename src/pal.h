@@ -24,7 +24,7 @@ namespace pal
     bool decode(const std::filesystem::path& input, const std::filesystem::path& output);
 
     std::vector<uint8_t> readBytes(const std::filesystem::path& path);
-    std::pair<std::vector<uint16_t>, bool> readPairs(const std::filesystem::path& path);
+    std::pair<std::vector<Variable>, bool> readPairs(const std::filesystem::path& path);
 
     std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings);
 }

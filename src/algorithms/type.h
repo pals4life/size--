@@ -15,7 +15,6 @@ enum class Algorithm {
 	none,
 	bisection,
 	bisectionPlusPlus,
-	bisectionPlusPlusPlusPlus,
 	repair,
 	sequitur,
 	sequential,
