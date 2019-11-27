@@ -210,9 +210,9 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 			levelBegin = settings.offset(offset);
 		}
 
-		std::cout << "productions: " << variables.size() / 256.0 / productions.size() << std::endl;
-		std::cout << "map: " << variables.size() / 256.0 / map.size() << std::endl;
-		std::cout << "counters: " << variables.size() / 8.0 / counters.size() << std::endl;
+//		std::cout << "productions: " << variables.size() / 256.0 / productions.size() << std::endl;
+//		std::cout << "map: " << variables.size() / 256.0 / map.size() << std::endl;
+//		std::cout << "counters: " << variables.size() / 8.0 / counters.size() << std::endl;
 
 		variables.resize(size);
 
