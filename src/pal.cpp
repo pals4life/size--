@@ -51,7 +51,8 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
         else if(type == Algorithm::bisectionPlusPlusPlusPlus)
         {
             const auto [pairs, odd] = readPairs(input);
-            return algorithm::bisectionPlusPlusPlusPlus::compress(pairs, odd);
+	        std::vector<Variable> variables(pairs.begin(), pairs.end());
+	        return algorithm::bisectionPlusPlusPlusPlus::compress(std::move(variables), odd);
         }
         else if(type == Algorithm::lzw)
         {

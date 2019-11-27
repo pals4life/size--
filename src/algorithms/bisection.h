@@ -146,17 +146,13 @@ namespace algorithm::bisectionPlusPlus {
 namespace algorithm::bisectionPlusPlusPlusPlus {
 
 	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
-	compress(const std::vector<uint16_t>& pairs, bool odd) {
+	compress(std::vector<Variable>&& variables, bool odd) {
 		const auto settings = Settings();
 
 		std::vector<Production> productions;
 		std::unordered_map<Production, Variable> map;
 		std::unordered_map<Production, Counter<4>> counters;
-		productions.reserve(pairs.size() / 2);
-		map.reserve(pairs.size() / 2);
-		counters.reserve(pairs.size() / 2);
 
-		std::vector<Variable> variables(pairs.begin(), pairs.end());
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
 		if (not odd) variables.back() += 256;
 
@@ -165,12 +161,18 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 		uint32_t levelBegin = settings.begin();
 		size_t size = variables.size();
 
+		productions.reserve(size / 256);
+		map.reserve(size / 256);
+		counters.reserve(size / 8);
+
 		while (levelBegin != previousLevelBegin) {
 			size_t index = 0;
 
 			for (size_t i = 0; i < size / 2; ++i) {
 				const auto& var1 = variables[2 * i];
 				const auto& var2 = variables[2 * i + 1];
+
+				if (var1 < previousLevelBegin || var2 < previousLevelBegin) continue;
 
 				const auto pair = counters.try_emplace(Production{var1, var2}, Counter<4>());
 				if (!pair.second) {
@@ -199,12 +201,21 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 			}
 			if (size % 2 == 1) variables[index++] = variables[size - 1];
 
+			if (counters.load_factor() > 0.25f) {
+				counters.clear();
+				std::cout << "reloaded\n";
+			}
+
 			size = index;
 			previousLevelBegin = levelBegin;
 			levelBegin = settings.offset(offset);
 		}
 
 		variables.resize(size);
+
+//		std::cout << "productions: " << pairs.size() / 256.0 / productions.size() << std::endl;
+//		std::cout << "map: " << pairs.size() / 256.0 / map.size() << std::endl;
+//		std::cout << "counters: " << pairs.size() / 8.0 / counters.size() << std::endl;
 
 		return std::make_tuple(settings, std::move(variables), std::move(productions));
 	}

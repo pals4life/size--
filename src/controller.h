@@ -17,7 +17,7 @@ private:
 	boost::program_options::variables_map vm;
 	boost::program_options::options_description desc;
 	std::vector<std::filesystem::path> files;
-	bool tar;
+	bool tar = false;
 	bool verbose;
 	int returnValue = 0;
 
