@@ -2,146 +2,136 @@
 // @name        : repair.h
 // @author      : Thomas Dooms
 // @date        : 11/19/19
-// @version     : 
+// @version     :
 // @copyright   : BA1 Informatica - Thomas Dooms - University of Antwerp
-// @description : 
+// @description :
 //============================================================================
 
-
-#pragma once
-
-#include <tuple>
-#include <vector>
-#include <unordered_map>
-#include <queue>
-
-#include <boost/sort/spreadsort/integer_sort.hpp>
 #include <boost/heap/fibonacci_heap.hpp>
-
-#include "../util/settings.h"
-#include "../util/variable.h"
-#include "../util/production.h"
-#include "../util/timer.h"
+#include "absl/container/flat_hash_map.h"
 
 namespace algorithm::repair
 {
-
-std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes, bool prepass = true)
-{
-    constexpr auto compose   = [](uint64_t lhs, uint64_t rhs) -> uint64_t { return (lhs << 32u) + rhs; };
-
-    constexpr size_t prepass_cutoff = 3;  // magic number
-    constexpr size_t byte_pairs = 65536;  // more magic numbers
-    constexpr size_t cutoff = 100;        // all these magic numbers
-    constexpr size_t min_count = 50;      // hmm
-
-    Settings settings(Settings::reserved | Settings::smart_productions);
-
-    // max 4*n space
-    // vector of productions bodies
-    std::vector<Production> productions;
-
-    // will become the resulting string
-    std::vector<Variable> string; // smart reserve
-
-    // we use this scope so our vectors do not persist through the rest of the function
-    // in this pass we quickly go through the bytes and pair the most frequent pairs in an efficient way
-    // we make no "new" productions because we reserve the variables.
-
-    Utils::Timer::start();
-    if(prepass)
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
     {
-        // define the number of pairs that must occur before we change them
-        std::vector<uint32_t> frequencies(byte_pairs);
+        constexpr auto compose   = [](uint64_t lhs, uint64_t rhs) -> uint64_t { return (lhs << 32u) + rhs; };
+        constexpr auto decompose = [](uint64_t elem) { return std::array{static_cast<uint32_t>(elem >> 32u), static_cast<uint32_t>(elem)}; };
 
-        for(size_t i = 0; i < bytes.size() - 1; i++)
+        struct Compare
         {
-            const auto pair = Settings::convert_to_reserved(bytes[i], bytes[i+1]);
-            frequencies[pair]++;
-        }
-        for(size_t i = 0; i < bytes.size() - 1; i++)
-        {
-            const auto pair = Settings::convert_to_reserved(bytes[i], bytes[i+1]);
-            if(frequencies[pair] > prepass_cutoff)
+            bool operator()(void* lhs, void* rhs) const noexcept
             {
-                string.emplace_back(pair);
-                i++;
+                using Type = const std::pair<size_t, std::pair<std::vector<uint32_t>, uint64_t>>*;
+                return reinterpret_cast<Type>(lhs)->second.first.size() < reinterpret_cast<Type>(rhs)->second.first.size();
+            }
+        };
+
+        using Queue = boost::heap::fibonacci_heap<void*, boost::heap::compare<Compare>>;
+        using Map   = std::unordered_map<size_t, std::pair<std::vector<uint32_t>, Queue::handle_type>>;
+        using Element = const std::pair<size_t, std::pair<std::vector<uint32_t>, Queue::handle_type>>*;
+
+        absl::flat_hash_map<int, int> test;
+
+        const auto emplace = [](auto& map, auto& queue, size_t pair, size_t index)
+        {
+            const auto [iter, emplaced] = map.try_emplace(pair);
+
+            if(emplaced)
+            {
+                const auto handle = queue.push(&*iter);
+                iter->second.first = std::vector<uint32_t>{ static_cast<uint32_t>(index) };
+                iter->second.second = handle;
             }
             else
             {
-                string.emplace_back(bytes[i]);
+                iter->second.first.emplace_back(index);
+                queue.increase(iter->second.second);
             }
-        }
-    }
-    Utils::Timer::end();
+        };
 
-    Utils::Timer::start();
+        Queue queue;
+        Map map;
 
-    size_t count = std::numeric_limits<size_t>::max();
-    size_t index = 0;
-    size_t replaced = 0;
+        Settings settings;
+        std::vector<Variable> string(bytes.begin(), bytes.end());
+        std::vector<Production> productions;
 
-    std::unordered_map<uint64_t, std::pair<uint32_t, uint32_t>> map(string.size() / 2);
+        size_t production_counter = 0;
 
-    while(count > min_count)
-    {
-        count = 0;
-        replaced = 0;
+        constexpr size_t cutoff = 4; // magic stuff
+
+        size_t last_pair = 0;
 
         for(size_t i = 0; i < string.size() - 1; i++)
         {
-            const auto [iter, emplaced] = map.try_emplace(compose(string[i], string[i + 1]), 1, 0);
+            const auto pair = compose(string[i], string[i+1]);
 
-            if(emplaced) continue;
-            iter->second.first++;
-
-            if(iter->second.first > cutoff)
+            // skip when we have a string of the same chars
+            if(pair == last_pair)
             {
-                if(Settings::is_reserved_rule(string[i], string[i + 1]))
-                {
-                    iter->second.second = Settings::convert_to_reserved(string[i], string[i + 1]);
-                }
-                else if(iter->second.second == 0)
-                {
-                    iter->second.second = settings.offset(index);
-                    productions.emplace_back(std::array{string[i], string[i+1]});
-                    index++;
-                }
-                count++;
+                last_pair = 0;
+                continue;
             }
+            else last_pair = pair;
+
+            emplace(map, queue, pair, i);
         }
-        for(size_t i = 0; i < string.size() - 1; i++)
+
+        while(true)
         {
-            const auto val  = compose(string[i], string[i + 1]);
-            const auto iter = map.find(val);
-            if(iter != map.end() and iter->second.first > cutoff)
+            const auto top = reinterpret_cast<Element>(queue.top());
+            std::cout << top->second.first.size() << '\n';
+            if(top->second.first.size() <= cutoff) break;
+
+            for(auto index : top->second.first)
             {
-                string[i] = iter->second.second;
-                string[i + 1] = Settings::end();
-                i++;
-                replaced++;
+                const auto lambda = [](const auto elem){ return elem != Settings::end(); };
+                const auto curr = string.begin() + index;
+
+                const auto second = std::find_if(curr + 1, string.end(), lambda);
+                const auto next = std::find_if(second + 1, string.end(), lambda);
+
+                if(next != string.end())
+                {
+                    // this should always exists, so we don;t check on out of bounds
+                    const auto iter = map.find(compose(*second, *next));
+                    queue.decrease(iter->second.second);
+//                    iter->sec
+                }
+                const auto prev = std::find_if(std::reverse_iterator(curr) + 1, string.rend(), lambda);
+                if(prev != string.rend())
+                {
+                    // same here
+                    const auto iter = map.find(compose(*prev, *curr));
+                    queue.decrease(iter->second.second);
+                }
+
+                *curr = settings.offset(production_counter);
+                if(second != string.end()) *second = Settings::end();
+
+                if(next != string.end() )emplace(map, queue, compose(*curr, *next), index);
+                if(prev != string.rend())emplace(map, queue, compose(*prev, *curr), prev.base() - string.begin());
             }
+            productions.emplace_back(decompose(top->first));
+            production_counter++;
+
+            queue.pop();
+            map.erase(top->first);
         }
 
-        // remove all the tombstones in the string
-        const auto end = std::remove_copy_if(string.begin(), string.end(), string.begin(),
-            [](const auto elem){ return elem == Settings::end(); });
 
-        // resize to the end
-        string.resize(end - string.begin());
-        std::cout << "guessed  " << count    << " variables\n";
-        std::cout << "replaced " << replaced << " variables\n\n";
+        return std::make_tuple(settings, std::move(string), std::move(productions));
     }
-
-    Utils::Timer::end();
-
-    std::cout << "used " << productions.size() << " productions\n";
-
-
-    return std::make_tuple(settings, std::move(string), std::move(productions));
 }
 
 
-}
+
+
+
+
+
+
+
+
 
 
