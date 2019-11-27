@@ -48,11 +48,6 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
 	        auto [variables, odd] = readPairs(input);
 	        return algorithm::bisectionPlusPlus::compress(std::move(variables), odd);
         }
-        else if(type == Algorithm::bisectionPlusPlusPlusPlus)
-        {
-        	auto [variables, odd] = readPairs(input);
-	        return algorithm::bisectionPlusPlusPlusPlus::compress(std::move(variables), odd);
-        }
         else if(type == Algorithm::lzw)
         {
             algorithm::lzw::compress(input, output);

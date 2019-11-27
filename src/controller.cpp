@@ -17,11 +17,10 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 			                                 "0 none,\n"
 			                                 "1 bisection,\n"
 			                                 "2 bisection++,\n"
-			                                 "3 bisection++++,\n"
-			                                 "4 repair,\n"
-			                                 "5 sequitur,\n"
-			                                 "6 sequential\n"
-			                                 "7 LZW")
+			                                 "3 repair,\n"
+			                                 "4 sequitur,\n"
+			                                 "5 sequential\n"
+			                                 "6 LZW")
 			("extract,x", "extract file(s) from an archive");
 
 	options_description hidden;

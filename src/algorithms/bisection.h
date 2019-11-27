@@ -88,68 +88,6 @@ namespace algorithm::bisectionPlusPlus {
 
 		std::vector<Production> productions;
 		robin_hood::unordered_flat_map<Production, Variable> map;
-		std::vector<Counter<4>> counters;
-		productions.reserve(variables.size() / 2);
-		map.reserve(variables.size() / 2);
-		counters.reserve(variables.size() / 2);
-
-		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
-		if (not odd) variables.back() += 256;
-
-		uint32_t offset = 0;
-		uint32_t previousLevelBegin = 0;
-		uint32_t levelBegin = settings.begin();
-		size_t size = variables.size();
-
-		while (levelBegin != previousLevelBegin) {
-			size_t index = 0;
-
-			for (size_t i = 0; i < size / 2; ++i) {
-				const auto& var1 = variables[2 * i];
-				const auto& var2 = variables[2 * i + 1];
-
-				// enkel variabelen van vorige level die kunnen herhaald worden
-				if (size != variables.size()) {
-					if (var1 < previousLevelBegin || var2 < previousLevelBegin ||
-					    !counters[var1 - settings.begin()]() || !counters[var2 - settings.begin()]()) {
-						variables[index++] = var1;
-						variables[index++] = var2;
-						continue;
-					}
-				}
-
-				const auto pair = map.emplace(Production{var1, var2}, settings.offset(offset));
-				if (pair.second) {
-					++offset;
-					productions.emplace_back((*pair.first).first);
-					counters.emplace_back(Counter<4>());
-				} else {
-					++counters[(*pair.first).second - settings.begin()];
-				}
-				variables[index++] = (*pair.first).second;
-			}
-			if (size % 2 == 1) variables[index++] = variables[size - 1];
-
-			size = index;
-			previousLevelBegin = levelBegin;
-			levelBegin = settings.offset(offset);
-		}
-
-		variables.resize(size);
-
-		return std::make_tuple(settings, std::move(variables), std::move(productions));
-	}
-
-}
-
-namespace algorithm::bisectionPlusPlusPlusPlus {
-
-	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
-	compress(std::vector<Variable>&& variables, bool odd) {
-		const auto settings = Settings();
-
-		std::vector<Production> productions;
-		robin_hood::unordered_flat_map<Production, Variable> map;
 		robin_hood::unordered_flat_map<Production, Counter<4>> counters;
 
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
@@ -202,7 +140,6 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 
 			if (counters.load_factor() > 0.25f) {
 				counters.clear();
-				std::cout << "reloaded\n";
 			}
 
 			size = index;
