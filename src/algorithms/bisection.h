@@ -17,6 +17,7 @@
 #include "../util/variable.h"
 #include "../util/production.h"
 #include "../util/settings.h"
+#include "../util/robin_hood.h"
 
 template<uint8_t MAX>
 class Counter {
@@ -36,19 +37,18 @@ private:
 namespace algorithm::bisection {
 
 	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
-	compress(const std::vector<uint16_t>& pairs, bool odd) {
+	compress(std::vector<Variable>&& variables, bool odd) {
 		const auto settings = Settings();
 		std::vector<Production> productions;
-		productions.reserve(pairs.size() / 2);
+		productions.reserve(variables.size() / 2);
 
-		std::vector<Variable> variables(pairs.begin(), pairs.end());
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
 
 		if (not odd) variables.back() += 256;
 
 		bool startReached = false;
-		std::unordered_map<Production, Variable> map;
-		map.reserve(pairs.size());
+		robin_hood::unordered_flat_map<Production, Variable> map;
+		map.reserve(variables.size());
 
 		uint32_t offset = 0;
 		size_t size = variables.size();
@@ -57,7 +57,7 @@ namespace algorithm::bisection {
 			bool uneven = size % 2 != 0;
 
 			for (size_t i = 0; i < size / 2; ++i) {
-				const auto pair = map.try_emplace(Production{variables[2 * i], variables[2 * i + 1]},
+				const auto pair = map.emplace(Production{variables[2 * i], variables[2 * i + 1]},
 				                                  settings.offset(offset));
 				if (pair.second) {
 					++offset;
@@ -83,17 +83,16 @@ namespace algorithm::bisection {
 namespace algorithm::bisectionPlusPlus {
 
 	std::tuple<Settings, std::vector<Variable>, std::vector<Production>>
-	compress(const std::vector<uint16_t>& pairs, bool odd) {
+	compress(std::vector<Variable>&& variables, bool odd) {
 		const auto settings = Settings();
 
 		std::vector<Production> productions;
-		std::unordered_map<Production, Variable> map;
+		robin_hood::unordered_flat_map<Production, Variable> map;
 		std::vector<Counter<4>> counters;
-		productions.reserve(pairs.size() / 2);
-		map.reserve(pairs.size() / 2);
-		counters.reserve(pairs.size() / 2);
+		productions.reserve(variables.size() / 2);
+		map.reserve(variables.size() / 2);
+		counters.reserve(variables.size() / 2);
 
-		std::vector<Variable> variables(pairs.begin(), pairs.end());
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
 		if (not odd) variables.back() += 256;
 
@@ -119,7 +118,7 @@ namespace algorithm::bisectionPlusPlus {
 					}
 				}
 
-				const auto pair = map.try_emplace(Production{var1, var2}, settings.offset(offset));
+				const auto pair = map.emplace(Production{var1, var2}, settings.offset(offset));
 				if (pair.second) {
 					++offset;
 					productions.emplace_back((*pair.first).first);
@@ -150,8 +149,8 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 		const auto settings = Settings();
 
 		std::vector<Production> productions;
-		std::unordered_map<Production, Variable> map;
-		std::unordered_map<Production, Counter<4>> counters;
+		robin_hood::unordered_flat_map<Production, Variable> map;
+		robin_hood::unordered_flat_map<Production, Counter<4>> counters;
 
 		std::for_each(variables.begin(), variables.end() - 1, [](auto& elem) { elem += 256; });
 		if (not odd) variables.back() += 256;
@@ -174,7 +173,7 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 
 				if (var1 < previousLevelBegin || var2 < previousLevelBegin) continue;
 
-				const auto pair = counters.try_emplace(Production{var1, var2}, Counter<4>());
+				const auto pair = counters.emplace(Production{var1, var2}, Counter<4>());
 				if (!pair.second) {
 					++((*pair.first).second);
 				}
@@ -191,7 +190,7 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 					continue;
 				}
 
-				const auto pair = map.try_emplace(Production{var1, var2}, settings.offset(offset));
+				const auto pair = map.emplace(Production{var1, var2}, settings.offset(offset));
 				if (pair.second) {
 					++offset;
 					productions.emplace_back((*pair.first).first);
@@ -211,11 +210,11 @@ namespace algorithm::bisectionPlusPlusPlusPlus {
 			levelBegin = settings.offset(offset);
 		}
 
-		variables.resize(size);
+		std::cout << "productions: " << variables.size() / 256.0 / productions.size() << std::endl;
+		std::cout << "map: " << variables.size() / 256.0 / map.size() << std::endl;
+		std::cout << "counters: " << variables.size() / 8.0 / counters.size() << std::endl;
 
-//		std::cout << "productions: " << pairs.size() / 256.0 / productions.size() << std::endl;
-//		std::cout << "map: " << pairs.size() / 256.0 / map.size() << std::endl;
-//		std::cout << "counters: " << pairs.size() / 8.0 / counters.size() << std::endl;
+		variables.resize(size);
 
 		return std::make_tuple(settings, std::move(variables), std::move(productions));
 	}

@@ -40,18 +40,17 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
         }
         else if(type == Algorithm::bisection)
         {
-            const auto [pairs, odd] = readPairs(input);
-            return algorithm::bisection::compress(pairs, odd);
+	        auto [variables, odd] = readPairs(input);
+	        return algorithm::bisection::compress(std::move(variables), odd);
         }
         else if(type == Algorithm::bisectionPlusPlus)
         {
-            const auto [pairs, odd] = readPairs(input);
-            return algorithm::bisectionPlusPlus::compress(pairs, odd);
+	        auto [variables, odd] = readPairs(input);
+	        return algorithm::bisectionPlusPlus::compress(std::move(variables), odd);
         }
         else if(type == Algorithm::bisectionPlusPlusPlusPlus)
         {
-            const auto [pairs, odd] = readPairs(input);
-	        std::vector<Variable> variables(pairs.begin(), pairs.end());
+        	auto [variables, odd] = readPairs(input);
 	        return algorithm::bisectionPlusPlusPlusPlus::compress(std::move(variables), odd);
         }
         else if(type == Algorithm::lzw)
@@ -105,7 +104,7 @@ std::vector<uint8_t> readBytes(const std::filesystem::path& path)
     return string;
 }
 
-std::pair<std::vector<uint16_t>, bool> readPairs(const std::filesystem::path& path)
+std::pair<std::vector<Variable>, bool> readPairs(const std::filesystem::path& path)
 {
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path.string());
@@ -117,7 +116,8 @@ std::pair<std::vector<uint16_t>, bool> readPairs(const std::filesystem::path& pa
     fread(string.data(), 2, size, file);
 
     fclose(file);
-    return std::make_pair(std::move(string), size % 2);
+	std::vector<Variable> variables(string.begin(), string.end());
+    return std::make_pair(std::move(variables), size % 2);
 }
 
 std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings)
