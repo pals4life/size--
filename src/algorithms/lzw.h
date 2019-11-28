@@ -11,7 +11,7 @@
 #include <vector>
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <tuple>
 #include <fstream>
 
@@ -27,8 +27,8 @@ namespace algorithm::lzw
 {
 
     std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(
-            const std::filesystem::path& input,
-            const std::filesystem::path& output)
+            const std::experimental::filesystem::path& input,
+            const std::experimental::filesystem::path& output)
     {
 
 

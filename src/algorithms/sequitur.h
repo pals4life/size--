@@ -16,34 +16,37 @@
 #include <fstream>
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
-
-#include "../../util/variable.h"
-#include "../../util/production.h"
-#include "../../util/settings.h"
-#include "./Node.h"
-#include "./TableValue.h"
 #include <tuple>
 
-using namespace algorithm::sequitur;
+#include "../util/variable.h"
+#include "../util/production.h"
+#include "../util/settings.h"
 
 namespace algorithm::sequitur
 {
     using Digram = std::pair<uint32_t, uint32_t>;
     using limits = std::numeric_limits<uint32_t>;
 
+    struct Node
+    {
+        uint32_t value;
+        Node* next = nullptr;
+        Node* previous = nullptr;
+        Node(uint32_t value, Node* next, Node* previous): value(value), next(next), previous(previous) {};
+        Node(uint32_t value): value(value) {};
+    };
+
     class Encoder
     {
         std::vector<Node> nodes;
         std::vector<Production> productions;
-        std::unordered_map<Digram, TableValue, boost::hash<Digram>> index;
-        std::unordered_map<Digram, uint32_t , boost::hash<Digram>> rules;
+        std::unordered_map<Digram, Node *, boost::hash<Digram>> index;
+        std::unordered_map<Digram, std::pair<uint32_t, uint32_t>, boost::hash<Digram>> rules;
         uint32_t begin;
         Node* head;
         void erase(Node * node);
         void linkSymbol(Node* &node);
         void replaceByRule(Node* node, uint32_t rule);
-        //void checkRules(Node* node, Digram &digram);
-        static std::vector<Node> vectorToNodes(const std::vector<unsigned char> &input);
         static std::vector<uint32_t> NodesToVector(Node * start);
         void decode(uint32_t c, uint32_t begin);
 
