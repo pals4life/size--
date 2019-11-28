@@ -72,6 +72,7 @@ namespace algorithm::lzw
                 x = c;
             }
         }
+
         //outputFile << x;
         return std::make_tuple(settings, std::vector<Variable>(), std::vector<Production>());
     }

@@ -39,6 +39,11 @@ void Encoder::replaceByRule(Node *node, uint32_t rule)
     erase(node->previous);
 }
 
+void Encoder::checkRules(const algorithm::sequitur::Digram &digram)
+{
+
+}
+
 void Encoder::linkSymbol(Node* &node)
 {
     Digram digram = {node->previous->value, node->value};
@@ -150,10 +155,6 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::co
 
     std::vector<Variable> variables = NodesToVector(head);
 
-    for (auto c:variables)
-    {
-        decode(c, settings.begin());
-    }
     return std::make_tuple(settings, std::move(variables), std::move(productions));
 }
 

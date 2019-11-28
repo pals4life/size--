@@ -44,10 +44,18 @@ namespace algorithm::sequitur
         std::unordered_map<Digram, std::pair<uint32_t, uint32_t>, boost::hash<Digram>> rules;
         uint32_t begin;
         Node* head;
+
+        // erases a node from the linked chain
         void erase(Node * node);
+        // function that looks at the digram the node forms and takes actions accordingly
         void linkSymbol(Node* &node);
+        // replaces a digram by a rule
         void replaceByRule(Node* node, uint32_t rule);
+        // checks if the digram replaction causes a rule to be only used once
+        void checkRules(const Digram &digram);
+        // converts the initial vector of characters in to nodes
         static std::vector<uint32_t> NodesToVector(Node * start);
+        // decode function
         void decode(uint32_t c, uint32_t begin);
 
     public:
