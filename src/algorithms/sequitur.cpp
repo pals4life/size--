@@ -21,27 +21,9 @@ void Encoder::erase(Node *node)
     if (node->next != nullptr) node->next->previous = node->previous;
 }
 
-std::vector<Node> Encoder::vectorToNodes(const std::vector<unsigned char> &input)
-{
-    std::vector<Node> nodes;
-    nodes.reserve(input.size());
-    for (auto var:input)
-    {
-        nodes.emplace_back(Node(var));
-    }
-
-    for (int i=0;i<nodes.size();i++)
-    {
-        if (i != 0) nodes[i].previous = &nodes[i-1];
-        if (i != nodes.size()-1) nodes[i].next = &nodes[i+1];
-    }
-    return std::move(nodes);
-}
-
 std::vector<uint32_t> Encoder::NodesToVector(Node *start)
 {
     std::vector<uint32_t> variables;
-    bool check = false;
     while (start != nullptr)
     {
         variables.emplace_back(start->value);
@@ -61,47 +43,41 @@ void Encoder::linkSymbol(Node* &node)
     Digram digram = {node->previous->value, node->value};
     auto it = index.find(digram);
 
-    if (digram.first == 97 and digram.second == 97)
-    {
-        int a = 0;
-    }
     if (rules.find(digram) != rules.end())
     {
         if (node->previous->previous != nullptr) index.erase(std::make_pair(node->previous->previous->value, digram.first));
-        replaceByRule(node, rules.at(digram));
+        replaceByRule(node, rules.at(digram).first);
         linkSymbol(node);
     }
 
-    else if (it == index.end())                                      // digram does not exists
+    else if (it == index.end()) // digram does not exists
     {
-        index.try_emplace(std::move(digram), TableValue(node, limits::max()));
+        index.try_emplace(std::move(digram), node);
         return;
     }
 
-    else if (index.at(digram).node == node)
-    {
-        return;
-    }
-    else if (index.at(digram).node == node->previous)    // digram overlaps
+    else if (index.at(digram) == node->previous or index.at(digram) == node)    // digram overlaps
     {
         return;
     }
     else
     {
-        rules[digram] = begin;
+        // we make a rule for the current digram
+        rules[digram] = std::make_pair(begin, 1);
         productions.emplace_back(Production{digram.first, digram.second});
-        Node * location = index.at(digram).node;
+        Node * location = index.at(digram);
 
+        // we delete all the digrams resulting the replacement of the 2 digrams
         index.erase(digram);
         if (node->previous->previous != nullptr) index.erase(std::make_pair(node->previous->previous->value, digram.first));
         if (location->previous->previous != nullptr) index.erase(std::make_pair(location->previous->previous->value, digram.first));
         index.erase(std::make_pair(digram.second, location->next->value));
 
-        // previously found digram
+        // we replace both digrams by the rule
         replaceByRule(node, begin);
         replaceByRule(location, begin);
 
-
+        // we check for newly found digrams at the first location
         if (location->previous != nullptr)
         {
             linkSymbol(location);
@@ -111,6 +87,7 @@ void Encoder::linkSymbol(Node* &node)
             linkSymbol(location->next);
         }
 
+        // we check for the newly found digrams at the current location
         linkSymbol(node);
         begin++;
     }
@@ -121,10 +98,6 @@ void Encoder::decode(uint32_t c, uint32_t begin)
 {
     if (c < begin)
     {
-        if (char(c)=='.');
-        {
-            int a = 0;
-        }
         std::cout << char(c) << std::flush;
         return;
     }
@@ -132,7 +105,7 @@ void Encoder::decode(uint32_t c, uint32_t begin)
     {
         for (auto rule:rules)
         {
-            if (rule.second == c)
+            if (rule.second.first == c)
             {
                 decode(rule.first.first, begin);
                 decode(rule.first.second, begin);
@@ -156,7 +129,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::co
         nodes.emplace_back(Node(var));
     }
 
-    for (int i=0;i<nodes.size();i++)
+    for (uint i=0;i<nodes.size();i++)
     {
         if (i != 0) nodes[i].previous = &nodes[i-1];
         if (i != nodes.size()-1) nodes[i].next = &nodes[i+1];
@@ -180,27 +153,3 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> algorithm::
 {
     return Encoder().compress(std::move(string));
 }
-/*
- *
-
-void algorithm::sequitur::decode(const std::unordered_map<Digram, uint32_t, boost::hash<Digram>> &rules, u_int32_t c, u_int32_t begin)
-{
-    if (c == std::numeric_limits<uint32_t>::max()) return;
-
-    if (c < begin)
-    {
-        std::cout << char(c) << std::flush;
-        return;
-    }
-
-    for (auto &rule:rules)
-    {
-        if (rule.second == c)
-        {
-            decode(rules, rule.first.first, begin);
-            decode(rules, rule.first.second, begin);
-            return;
-        }
-    }
-}
- */

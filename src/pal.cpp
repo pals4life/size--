@@ -12,7 +12,7 @@
 #include "pal.h"
 
 #include "algorithms/none.h"
-#include "algorithms/sequitur/sequitur.h"
+#include "algorithms/sequitur.h"
 
 #include "pal/decoder.h"
 #include "pal/encoder.h"
