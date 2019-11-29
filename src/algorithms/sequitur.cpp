@@ -24,7 +24,6 @@ void Encoder::erase(Node *node)
 std::vector<uint32_t> Encoder::NodesToVector(Node *start)
 {
     std::vector<uint32_t> variables;
-    bool check = false;
     while (start != nullptr)
     {
         variables.emplace_back(start->value);
@@ -37,11 +36,6 @@ void Encoder::replaceByRule(Node *node, uint32_t rule)
 {
     node->value = rule;
     erase(node->previous);
-}
-
-void Encoder::checkRules(const algorithm::sequitur::Digram &digram)
-{
-
 }
 
 void Encoder::linkSymbol(Node* &node)
@@ -104,10 +98,6 @@ void Encoder::decode(uint32_t c, uint32_t begin)
 {
     if (c < begin)
     {
-        if (char(c)=='.');
-        {
-            int a = 0;
-        }
         std::cout << char(c) << std::flush;
         return;
     }
@@ -139,7 +129,7 @@ std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::co
         nodes.emplace_back(Node(var));
     }
 
-    for (int i=0;i<nodes.size();i++)
+    for (uint i=0;i<nodes.size();i++)
     {
         if (i != 0) nodes[i].previous = &nodes[i-1];
         if (i != nodes.size()-1) nodes[i].next = &nodes[i+1];

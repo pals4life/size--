@@ -14,6 +14,8 @@
 #include <experimental/filesystem>
 #include <tuple>
 #include <fstream>
+#include "../util/robin_hood.h"
+
 
 #include "../util/variable.h"
 #include "../util/production.h"
@@ -27,18 +29,22 @@ namespace algorithm::lzw
 {
 
     std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(
-            const std::filesystem::path& input,
-            const std::filesystem::path& output)
+            const std::experimental::filesystem::path& input,
+            const std::experimental::filesystem::path& output)
     {
 
 
+        using Pair = uint32_t;
+        constexpr auto compose   = [](Variable lhs, Variable rhs) -> Pair { return (static_cast<Pair>(lhs) << 16u) + rhs; };
+
+        
         // write metadata
         Settings settings;
-        /*
-        pal::Metadata metadata( , 0, settings);
+
+        pal::Metadata metadata(0 , 0, settings);
         Bitwriter writer(output);
         pal::Encoder::encodeMetadata(writer, metadata);
-        */
+
 
         // read input
         std::ifstream inputFile (input);
@@ -48,26 +54,25 @@ namespace algorithm::lzw
         inputFile.get(c);
 
         std::vector<Variable> variables;
-        std::unordered_map<std::pair<uint16_t,uint16_t>, uint16_t, boost::hash<std::pair<uint16_t , uint16_t>>> table;
-        table.reserve(4096);
-        for (uint16_t i=0;i<256;i++) table[std::make_pair(i, 0)] = i;
+        robin_hood::unordered_flat_map <uint32_t , uint16_t> map;
+        for (uint16_t i=0;i<256;i++) map[compose(i, 0)] = i;
 
 
         uint16_t value = settings.begin();
         uint16_t x = c;
 
+
         //compress
         while (inputFile.get(c))
         {
-            auto pair = std::make_pair(x, c);
-            auto it = table.find(pair);
-            if (it != table.end())
+            auto pair = compose(x, c);
+            auto it = map.find(compose(x, c));
+            if (it != map.end())
             {
                 x = it->second;
             }
             else {
-                table[pair] = value;
-                //outputFile << x;
+                map[pair] = value;
                 value++;
                 x = c;
             }

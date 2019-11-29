@@ -51,8 +51,6 @@ namespace algorithm::sequitur
         void linkSymbol(Node* &node);
         // replaces a digram by a rule
         void replaceByRule(Node* node, uint32_t rule);
-        // checks if the digram replaction causes a rule to be only used once
-        void checkRules(const Digram &digram);
         // converts the initial vector of characters in to nodes
         static std::vector<uint32_t> NodesToVector(Node * start);
         // decode function
