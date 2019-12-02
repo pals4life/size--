@@ -30,3 +30,7 @@ enum class Mode
 };
 
 std::istream& operator>>(std::istream& in, Algorithm& algorithm);
+
+std::istream& operator>>(std::istream& in, Mode& mode);
+
+std::ostream& operator<<(std::ostream& os, const Mode& mode);

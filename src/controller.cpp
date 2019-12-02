@@ -20,7 +20,13 @@ Controller::Controller(int argc, char** argv) : desc(options_description("option
 			                                 "3 repair,\n"
 			                                 "4 sequitur,\n"
 			                                 "5 sequential\n"
-			                                 "6 LZW")
+			                                 "6 LZW *")
+			("mode,m", value<Mode>()->default_value(Mode::none_specified),
+			 "run the algorithm in a certain mode (index or name; optional; only applies to algorithms with a *):\n"
+			 "0 none\n"
+			 "1 memory\n"
+			 "2 average\n"
+			 "3 fast")
 			("extract,x", "extract file(s) from an archive");
 
 	options_description hidden;
@@ -117,8 +123,7 @@ void Controller::compress() {
 	}
 
 
-
-	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), tar);
+	pal::encode(in, outputDirectory / outputFile, vm["create"].as<Algorithm>(), vm["mode"].as<Mode>(), tar);
 }
 
 void Controller::extract() {
