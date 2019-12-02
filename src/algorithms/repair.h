@@ -29,20 +29,13 @@ namespace algorithm::repair
             using reverse_iterator = std::vector<std::pair<Pair, uint32_t>>::reverse_iterator;
             using pointer  = std::vector<std::pair<Pair, uint32_t>>::pointer;
 
-            explicit queue(size_t amount) : low(200), high(), high_index(0), low_index(200)
+            // I haven't yet found a case where 200 is a bad guess.
+            explicit queue(size_t amount) : low(low_index), high()
             {
                 high.reserve(amount / 1000);
 
                 std::fill(increase_cache.begin(), increase_cache.end(), nullptr);
                 std::fill(decrease_cache.begin(), decrease_cache.end(), nullptr);
-
-                if(not smart_reserve) return;
-                // really smart magic numbers
-                low[0].reserve(amount / 250);
-                for(size_t i = 1; i < low.size(); i++)
-                {
-                    low[i].reserve(amount / (50 * std::sqrt(i)));
-                }
             }
 
             void insert(Pair pair)
@@ -50,8 +43,10 @@ namespace algorithm::repair
                 low[1].emplace(pair, false);
             }
 
-            void increase(Pair pair, uint32_t num)
+            [[nodiscard]] bool increase(Pair pair, uint32_t num)
             {
+                if(high_index != 0 and num > high[high_index - 1].second) return false;
+
                 if(num >= low.size())
                 {
                     const auto cache_iter = std::find_if(increase_cache.begin(), increase_cache.end(), [&](auto ptr){ return ptr != nullptr and ptr->first == pair; });
@@ -80,8 +75,10 @@ namespace algorithm::repair
                 }
                 else
                 {
+                    // update lowest index to highest inserted value
+                    low_index = std::max(low_index, static_cast<size_t>(num + 1));
                     // we actually dont need to erase, so we dont
-                    if(erase) low[num].erase(pair);
+                    low[num].erase(pair);
                     if (num + 1 < low.size())
                     {
                         low[num + 1].emplace(pair, false);
@@ -100,10 +97,14 @@ namespace algorithm::repair
                         }
                     }
                 }
+                return true;
             }
 
-            void decrease(Pair pair, uint32_t num)
+            [[nodiscard]] bool decrease(Pair pair, uint32_t num)
             {
+                if(high_index != 0 and num > high[high_index - 1].second) return false;
+                if(num == 0) return false;
+
                 if(num >= low.size())
                 {
                     const auto cache_iter = std::find_if(decrease_cache.begin(), decrease_cache.end(), [&](auto ptr){ return ptr != nullptr and ptr->first == pair; });
@@ -139,34 +140,36 @@ namespace algorithm::repair
                 else
                 {
                     // we actually dont need to erase, so we dont
-                    if(erase) low[num].erase(pair);
+                    low[num].erase(pair);
                     low[num - 1].emplace(pair, false);
                 }
+                return true;
             }
 
             std::pair<Pair, uint32_t> pop() noexcept
             {
                 if(high_index < high.size()) return high[high_index++];
-
-                for(auto i = low.size(); i != 0; i--)
+                for(auto i = low_index; i != 0; i--)
                 {
                     if(low[i - 1].empty()) continue;
-
                     const auto copy = low[i - 1].begin()->first;
                     low[i - 1].erase( low[i - 1].begin() );
-
+                    //update low index to lowest found
+                    low_index = i;
                     return std::make_pair(copy, i - 1);
                 }
-                return std::make_pair(6969696969,69696969);
+                // has never happened before.
+                return std::make_pair(0,0);
             }
 
         private:
-            constexpr static inline bool erase = true; // false uses more memory but is faster - 5%
-            constexpr static inline bool smart_reserve = false; // true uses more memory but is faster - 10%
+            size_t high_index = 0;
+            size_t low_index = 200;
 
             std::vector<robin_hood::unordered_map<Pair, bool>> low;
             std::vector<std::pair<Pair, uint32_t>> high;
 
+            // this seems to be a good guess
             constexpr static inline size_t increase_size = 8;
             constexpr static inline size_t decrease_size = 8;
 
@@ -175,18 +178,49 @@ namespace algorithm::repair
 
             uint8_t decrease_index = 0;
             std::array<pointer, decrease_size> decrease_cache {};
-
-            size_t high_index;
-            size_t low_index;
         };
 
-        using map = robin_hood::unordered_node_map<Pair, std::pair<std::vector<Variable>, uint32_t>>;
+        using map = robin_hood::unordered_map<Pair, std::pair<std::vector<Variable>, uint32_t>>;
 
         class maxmap
         {
         public:
-            explicit maxmap(size_t amount) : map(amount / 7), queue(amount) {}
+            explicit maxmap(size_t amount, Mode mode) : queue(amount)
+            {
+                // very scientific
+                if(mode == Mode::memory_efficient) map = dot::map(amount / 20);
+                else if(mode == Mode::average) map = dot::map(amount / 12);
+                else if(mode == Mode::fast) map = dot::map(amount / 7);
+                else throw;
+            }
 
+            template<typename Func, bool update_queue = true>
+            void construct(const std::vector<Variable>& string, Func&& compose)
+            {
+                Pair last_pair = std::numeric_limits<Pair>::max();
+                for(size_t i = 0; i < string.size() - 1; i++)
+                {
+                    const auto pair = compose(string[i], string[i + 1]);
+
+                    // skip when we have a string of the same chars
+                    if(pair == last_pair)
+                    {
+                        last_pair = std::numeric_limits<Pair>::max();
+                        continue;
+                    }
+                    else last_pair = pair;
+                    emplace<update_queue>(pair, static_cast<uint32_t>(i));
+                }
+            }
+
+            template<typename Func>
+            void reconstruct(const std::vector<Variable>& string, Func&& compose)
+            {
+                map = dot::map();
+                construct(string, compose);
+            }
+
+            template<bool update_queue = true>
             void emplace(Pair pair, uint32_t index)
             {
                 const auto iter = map.find(pair);
@@ -194,30 +228,39 @@ namespace algorithm::repair
                 if(iter == map.end())
                 {
                     map.emplace(pair, std::make_pair(std::vector<uint32_t>{index}, 1));
-                    queue.insert(pair);
+                    if(update_queue) queue.insert(pair);
                 }
                 else
                 {
                     iter->second.first.push_back(index);
-                    queue.increase(iter->first, iter->second.second);
-                    iter->second.second += 1;
+                    if(update_queue)
+                    {
+                        const auto increased = queue.increase(iter->first, iter->second.second);
+                        if(increased) iter->second.second += 1;
+                    }
+                    else iter->second.second += 1;
                 }
             }
 
             auto pop() noexcept
             {
+                // find element in map
                 const auto top = queue.pop();
-                return map.find(top.first);
+                const auto iter = map.find(top.first);
+
+                // move the element from the map
+                const auto result = *std::make_move_iterator(iter);
+                map.erase(iter);
+                return result;
             }
 
             void decrease(Pair pair, Pair curr) noexcept
             {
-                auto iter = map.find(pair);
-                if(curr != iter->first and iter->second.second != 0)
-                {
-                    queue.decrease(iter->first, iter->second.second);
-                    iter->second.second -= 1;
-                }
+                if(pair == curr) return;
+                const auto iter = map.find(pair);
+
+                const auto decreased = queue.decrease(iter->first, iter->second.second);
+                if(decreased) iter->second.second -= 1;
             }
 
             [[nodiscard]] auto size() const noexcept
@@ -233,49 +276,38 @@ namespace algorithm::repair
 
 
 
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes, Mode mode)
     {
         // all the lambda functions
         constexpr auto compose   = [](Variable lhs, Variable rhs) -> Pair { return (static_cast<Pair>(lhs) << 32u) + rhs; };
         constexpr auto decompose = [](Pair elem) { return std::array{static_cast<Variable>(elem >> 32u), static_cast<Variable>(elem)}; };
-
         constexpr auto not_tombstone = [](const auto elem){ return elem != Settings::end(); };
 
+        constexpr size_t min_occurrences = 8;                   // magic stuff
+        constexpr size_t production_guess = 100;                // safe guess, doesn't matter much
+        constexpr size_t min_memory_efficient_size = 100000000; // 100Mb
 
-        constexpr size_t min_occurences = 8; // magic stuff
-
+        if(mode == Mode::none_specified)
+        {
+            mode = (bytes.size() > min_memory_efficient_size) ? Mode::memory_efficient : Mode::fast;
+        }
 
         Settings settings;
-        dot::maxmap map(bytes.size());
+        dot::maxmap map(bytes.size(), mode);
         std::vector<Variable> string(bytes.begin(), bytes.end());
         std::vector<Production> productions;
 
-        productions.reserve(bytes.size() / 100);
+        productions.reserve(bytes.size() / production_guess);
 
         size_t production_counter = 0;
-        Pair last_pair = std::numeric_limits<Pair>::max();
 
-        for(size_t i = 0; i < string.size() - 1; i++)
-        {
-            const auto pair = compose(string[i], string[i + 1]);
-
-            // skip when we have a string of the same chars
-            if(pair == last_pair)
-            {
-                last_pair = std::numeric_limits<Pair>::max();
-                continue;
-            }
-            else last_pair = pair;
-            map.emplace(pair, i);
-        }
+        map.construct(string, compose);
 
         while(true)
         {
-            auto elem = map.pop();
-
-            if(elem->second.second <= min_occurences) break;
-
-            const auto pair = decompose(elem->first);
+            const auto [key, value] = map.pop();
+            if(value.second <= min_occurrences) break;
+            const auto pair = decompose(key);
 
             // determine new value for production
             uint32_t new_value;
@@ -290,8 +322,8 @@ namespace algorithm::repair
                 production_counter++;
             }
 
-            // loop over all occurences
-            for(auto index : elem->second.first)
+            // loop over all occurrences
+            for(auto index : value.first)
             {
                 const auto curr = string.begin() + index;
 
@@ -304,12 +336,10 @@ namespace algorithm::repair
                 if(second == string.end() or *second != pair[1]) continue;
 
                 const auto next = std::find_if(second + 1, string.end(), not_tombstone);
-
-                if(next != string.end()) map.decrease(compose(*second, *next), elem->first);
-
                 const auto prev = std::find_if(std::reverse_iterator(curr), string.rend(), not_tombstone);
 
-                if(prev != string.rend()) map.decrease(compose(*prev, *curr), elem->first);
+                if(next != string.end()) map.decrease(compose(*second, *next), key);
+                if(prev != string.rend()) map.decrease(compose(*prev, *curr), key);
 
                 *curr = new_value;
                 if(second != string.end()) *second = Settings::end();
@@ -317,34 +347,12 @@ namespace algorithm::repair
                 if(next != string.end() ) map.emplace(compose(*curr, *next), index);
                 if(prev != string.rend()) map.emplace(compose(*prev, *curr), prev.base() - string.begin() - 1);
             }
-            elem->second.first.clear();
         }
 
         // move away tombstones
         const auto end = std::copy_if(string.begin(), string.end(), string.begin(), not_tombstone);
         string.resize(end - string.begin());
 
-//        std::cout << "possible productions per byte: " << float(map.size()) / float(bytes.size()) << '\n';
-//        std::cout << "productions per byte: " << float(productions.size()) / float(bytes.size()) << '\n';
-//        std::cout << "productions: " << productions.size() << '\n';
-//
-//        auto copy = productions;
-//        std::sort(copy.begin(), copy.end());
-//        const auto last = std::unique(copy.begin(), copy.end());
-//        std::cout << "duplicate productions: " << copy.end() - last << '\n';
-
         return std::make_tuple(settings, std::move(string), std::move(productions));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

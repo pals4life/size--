@@ -21,4 +21,12 @@ enum class Algorithm {
 	lzw,
 };
 
+enum class Mode
+{
+    none_specified,
+    memory_efficient,
+    average,
+    fast,
+};
+
 std::istream& operator>>(std::istream& in, Algorithm& algorithm);

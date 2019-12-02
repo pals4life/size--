@@ -24,7 +24,7 @@
 namespace pal
 {
 
-void encode(const std::filesystem::path& input, const std::filesystem::path& output, Algorithm type, bool tar)
+void encode(const std::filesystem::path& input, const std::filesystem::path& output, Algorithm type, Mode mode, bool tar)
 {
     auto [settings, string, productions] = [&]()
     {
@@ -48,15 +48,15 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
 	        auto [variables, odd] = readPairs(input);
 	        return algorithm::bisectionPlusPlus::compress(std::move(variables), odd);
         }
-        else if(type == Algorithm::lzw)
-        {
-            algorithm::lzw::compress(input, output);
-            exit(0);
-        }
+//        else if(type == Algorithm::lzw)
+//        {
+//            algorithm::lzw::compress(input, output);
+//            exit(0);
+//        }
         else if(type == Algorithm::repair)
         {
             const auto bytes = readBytes(input);
-            return algorithm::repair::compress(bytes);
+            return algorithm::repair::compress(bytes, mode);
         }
         else
         {
