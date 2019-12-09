@@ -55,8 +55,8 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
 //        }
         else if(type == Algorithm::repair)
         {
-            const auto bytes = readBytes(input);
-            return algorithm::repair::compress(bytes, mode);
+            auto variables = readSmartVariables(input);
+            return algorithm::repair::compress(std::move(variables), mode);
         }
         else
         {
@@ -76,9 +76,7 @@ bool decode(const std::filesystem::path& input, const std::filesystem::path& out
 
     std::ofstream file(output, std::ios::binary);
     if(not file.is_open()) throw std::runtime_error("could not open file: " + output.string());
-    const auto yield = calculateYield(string, productions, metadata.settings);
-
-    file.write(reinterpret_cast<const char*>(yield.data()), yield.size() * sizeof(uint8_t));
+    writeYield(file, string, productions, metadata.settings);
     return metadata.settings.is_tar();
 }
 
@@ -115,7 +113,50 @@ std::pair<std::vector<Variable>, bool> readPairs(const std::filesystem::path& pa
     return std::make_pair(std::move(variables), size % 2);
 }
 
-std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings)
+std::vector<Variable> readVariables(const std::filesystem::path& path)
+{
+    const auto bytes = readBytes(path);
+    std::vector<Variable> variables(bytes.begin(), bytes.end());
+    return variables;
+}
+
+std::vector<Variable> readSmartVariables(const std::filesystem::path& path)
+{
+    constexpr size_t swap_size = 0; // 20 mb
+    auto file = fopen(path.c_str(), "rb");
+    if(not file) throw std::runtime_error("could not open file: " + path.string());
+
+    fseek(file, 0, SEEK_END);
+    const auto size = static_cast<size_t>(ftell(file));
+    fseek(file, 0, SEEK_SET);
+
+    // it's important to make this in the function itself, and not in a branch to allow NRVO
+    std::vector<Variable> result;
+
+    if(size > swap_size)
+    {
+        std::vector<uint16_t> temp((size / 2) + (size % 2));
+        fread(temp.data(), 2, size, file);
+        fclose(file);
+
+        result.assign(temp.begin(), temp.end());
+
+        std::for_each(result.begin(), result.end() - 1, [](auto& elem) { elem += 256; });
+        if (not size % 2) result.back() += 256;
+    }
+    else
+    {
+        std::vector<uint8_t> temp(size);
+        fread(temp.data(), 1, size, file);
+        fclose(file);
+
+        result.assign(temp.begin(), temp.end());
+    }
+
+    return result;
+}
+
+void writeYield(std::ofstream& file, const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings)
 {
     std::vector<std::string> yields(productions.size());
 
@@ -151,30 +192,24 @@ std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const s
         evaluate(productions[i][1]);
     }
 
-    const auto size = std::accumulate(string.begin(), string.end(), 0ul, calcSize);
-    std::vector<uint8_t> result(size);
-
-    auto iter = result.begin();
     for(const auto index : string)
     {
         if(Settings::is_byte(index))
         {
-            *iter++ = index;
+            file.write(reinterpret_cast<const char*>(&index), 1);
         }
         else if(settings.is_reserved_variable(index))
         {
             const auto [var0, var1] = Settings::convert_from_reserved(index);
-            *iter++ = var0;
-            *iter++ = var1;
+            file.write(reinterpret_cast<const char*>(&var0), 1);
+            file.write(reinterpret_cast<const char*>(&var1), 1);
         }
         else
         {
             const auto& yield = yields[index - settings.begin()];
-            iter = std::copy(yield.begin(), yield.end(), iter);
+            file.write(yield.data(), yield.size());
         }
     }
-
-    return result;
 }
 
 }

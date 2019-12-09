@@ -44,12 +44,14 @@ class OnlineHelper
 
     void writeMetadata(Metadata metadata)
     {
+        uint8_t unique = 93;
+
         auto& file = writer.get_file();
         file.seekp(0);
-        file.write(reinterpret_cast<char*>(metadata.stringSize), sizeof(metadata.stringSize));
-        file.write(reinterpret_cast<char*>(metadata.productionSize), sizeof(metadata.productionSize));
-        file.write(reinterpret_cast<char*>(metadata.settings.flags), sizeof(metadata.settings.flags));
-        file.write(reinterpret_cast<char*>(93), sizeof(uint8_t));
+        file.write(reinterpret_cast<char*>(&metadata.stringSize    ), sizeof(metadata.stringSize));
+        file.write(reinterpret_cast<char*>(&metadata.productionSize), sizeof(metadata.productionSize));
+        file.write(reinterpret_cast<char*>(&metadata.settings.flags), sizeof(metadata.settings.flags));
+        file.write(reinterpret_cast<char*>(&unique), sizeof(uint8_t));
         file.seekp(std::ios_base::end);
     }
 

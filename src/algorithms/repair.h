@@ -162,11 +162,20 @@ namespace algorithm::repair
                 return std::make_pair(0,0);
             }
 
+            void clear_unused(size_t min_occurrences)
+            {
+                for(size_t i = 0; i < min_occurrences; i++)
+                {
+                    // reset map
+                    low[i] = std::unordered_map<Pair, bool>();
+                }
+            }
+
         private:
             size_t high_index = 0;
             size_t low_index = 200;
 
-            std::vector<robin_hood::unordered_map<Pair, bool>> low;
+            std::vector<std::unordered_map<Pair, bool>> low;
             std::vector<std::pair<Pair, uint32_t>> high;
 
             // this seems to be a good guess
@@ -180,12 +189,12 @@ namespace algorithm::repair
             std::array<pointer, decrease_size> decrease_cache {};
         };
 
-        using map = robin_hood::unordered_map<Pair, std::pair<std::vector<Variable>, uint32_t>>;
+        using map = std::unordered_map<Pair, std::pair<std::vector<Variable>, uint32_t>>;
 
         class maxmap
         {
         public:
-            explicit maxmap(size_t amount, Mode mode) : queue(amount)
+            explicit maxmap(size_t amount, size_t min_occurrences, double clear_factor, Mode mode) : queue(amount), min_occurrences(min_occurrences), clear_factor(clear_factor)
             {
                 // very scientific
                 if(mode == Mode::memory_efficient) map = dot::map(amount / 20);
@@ -194,7 +203,7 @@ namespace algorithm::repair
                 else throw;
             }
 
-            template<typename Func, bool update_queue = true>
+            template<typename Func>
             void construct(const std::vector<Variable>& string, Func&& compose)
             {
                 Pair last_pair = std::numeric_limits<Pair>::max();
@@ -209,36 +218,25 @@ namespace algorithm::repair
                         continue;
                     }
                     else last_pair = pair;
-                    emplace<update_queue>(pair, static_cast<uint32_t>(i));
+                    emplace(pair, static_cast<uint32_t>(i));
                 }
             }
 
-            template<typename Func>
-            void reconstruct(const std::vector<Variable>& string, Func&& compose)
-            {
-                map = dot::map();
-                construct(string, compose);
-            }
-
-            template<bool update_queue = true>
             void emplace(Pair pair, uint32_t index)
             {
                 const auto iter = map.find(pair);
 
                 if(iter == map.end())
                 {
+                    unused_count++;
                     map.emplace(pair, std::make_pair(std::vector<uint32_t>{index}, 1));
-                    if(update_queue) queue.insert(pair);
+                    queue.insert(pair);
                 }
                 else
                 {
                     iter->second.first.push_back(index);
-                    if(update_queue)
-                    {
-                        const auto increased = queue.increase(iter->first, iter->second.second);
-                        if(increased) iter->second.second += 1;
-                    }
-                    else iter->second.second += 1;
+                    const auto increased = queue.increase(iter->first, iter->second.second);
+                    if(increased) iter->second.second += 1;
                 }
             }
 
@@ -258,46 +256,63 @@ namespace algorithm::repair
             {
                 if(pair == curr) return;
                 const auto iter = map.find(pair);
+                if(iter == map.end()) return; // means we cleared the unused
 
                 const auto decreased = queue.decrease(iter->first, iter->second.second);
-                if(decreased) iter->second.second -= 1;
+                if(decreased)
+                {
+                    if(iter->second.second == min_occurrences) unused_count--;
+                    iter->second.second -= 1;
+                }
             }
 
-            [[nodiscard]] auto size() const noexcept
+            void try_clear_unused()
             {
-                return map.size();
+                if(double(unused_count) / double(map.size()) < 1 - clear_factor) return;
+                unused_count = 0;
+
+                for(auto iter = map.begin(); iter != map.end(); ++iter)
+                {
+                    if(iter->second.second < min_occurrences) iter = map.erase(iter);
+                    if(iter == map.end()) break;
+                }
+                queue.clear_unused(min_occurrences);
             }
 
         private:
             dot::map map;
             dot::queue queue;
+
+            size_t min_occurrences;
+            double clear_factor;
+
+            size_t unused_count = 0;
         };
     }
 
 
 
-    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes, Mode mode)
+    std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(std::vector<Variable>&& string, Mode mode)
     {
         // all the lambda functions
         constexpr auto compose   = [](Variable lhs, Variable rhs) -> Pair { return (static_cast<Pair>(lhs) << 32u) + rhs; };
         constexpr auto decompose = [](Pair elem) { return std::array{static_cast<Variable>(elem >> 32u), static_cast<Variable>(elem)}; };
         constexpr auto not_tombstone = [](const auto elem){ return elem != Settings::end(); };
 
+        constexpr double clear_factor = 0.80;                   // if 1/5 is unused, run the clear
         constexpr size_t min_occurrences = 8;                   // magic stuff
         constexpr size_t production_guess = 100;                // safe guess, doesn't matter much
-        constexpr size_t min_memory_efficient_size = 100000000; // 100Mb
+        constexpr size_t min_memory_efficient_size = 50000000;  // 50MB
 
-        if(mode == Mode::none_specified)
-        {
-            mode = (bytes.size() > min_memory_efficient_size) ? Mode::memory_efficient : Mode::fast;
-        }
+        if(mode == Mode::none_specified) mode = Mode::memory_efficient;
+        if(mode == Mode::fast and string.size() > min_memory_efficient_size) mode = Mode::memory_efficient;
+
 
         Settings settings;
-        dot::maxmap map(bytes.size(), mode);
-        std::vector<Variable> string(bytes.begin(), bytes.end());
+        dot::maxmap map(string.size(), min_occurrences, clear_factor, mode);
         std::vector<Production> productions;
 
-        productions.reserve(bytes.size() / production_guess);
+        productions.reserve(string.size() / production_guess);
 
         size_t production_counter = 0;
 
@@ -347,6 +362,8 @@ namespace algorithm::repair
                 if(next != string.end() ) map.emplace(compose(*curr, *next), index);
                 if(prev != string.rend()) map.emplace(compose(*prev, *curr), prev.base() - string.begin() - 1);
             }
+
+            if(mode != Mode::fast) map.try_clear_unused();
         }
 
         // move away tombstones

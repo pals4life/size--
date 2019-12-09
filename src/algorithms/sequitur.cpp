@@ -29,7 +29,7 @@ std::vector<uint32_t> Encoder::NodesToVector(Node *start)
         variables.emplace_back(start->value);
         start = start->next;
     }
-    return std::move(variables);
+    return variables;
 }
 
 void Encoder::replaceByRule(Node *node, uint32_t rule)
@@ -118,7 +118,7 @@ void Encoder::decode(uint32_t c, uint32_t begin)
 std::tuple<Settings, std::vector<Variable>, std::vector<Production>> Encoder::compress(
         std::vector<unsigned char> string)
 {
-    Settings settings(Settings::Flags::noflags);
+    Settings settings(Settings::Flags::no_flags);
     productions.reserve(string.size());
 
     begin = settings.begin();

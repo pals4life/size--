@@ -25,6 +25,8 @@ namespace pal
 
     std::vector<uint8_t> readBytes(const std::filesystem::path& path);
     std::pair<std::vector<Variable>, bool> readPairs(const std::filesystem::path& path);
+    std::vector<Variable> readVariables(const std::filesystem::path& path);
+    std::vector<Variable> readSmartVariables(const std::filesystem::path& path);
 
-    std::vector<uint8_t> calculateYield(const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings);
+    void writeYield(std::ofstream& file, const std::vector<Variable>& string, const std::vector<Production>& productions, Settings settings);
 }

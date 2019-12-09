@@ -19,11 +19,10 @@ struct Settings
 {
     enum Flags : size_t
     {
-        noflags = 0u,
+        no_flags = 0u,
         reserved = 1u,
-        variable_length = 2u,
-        smart_productions = 4u,
-        tar = 8u,
+        no_huffman = 2u,
+        tar = 4u,
     };
 
     explicit Settings(uint8_t flags = Flags::reserved) : flags(flags) {}
@@ -72,17 +71,13 @@ struct Settings
     {
         return flags & reserved;
     }
-    [[nodiscard]] bool has_variable_length() const noexcept
-    {
-        return flags & variable_length;
-    }
-    [[nodiscard]] bool has_smart_productions() const noexcept
-    {
-        return flags & smart_productions;
-    }
     [[nodiscard]] bool is_tar() const noexcept
     {
         return flags & tar;
+    }
+    [[nodiscard]] bool is_nohuffman() const noexcept
+    {
+        return flags & no_huffman;
     }
 
     uint8_t flags;

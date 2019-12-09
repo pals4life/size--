@@ -27,7 +27,7 @@ namespace algorithm::none
     std::tuple<Settings, std::vector<Variable>, std::vector<Production>> compress(const std::vector<uint8_t>& bytes)
     {
         std::vector<Variable> vec(bytes.begin(), bytes.end());
-        const auto settings = Settings(Settings::Flags::noflags);
+        const auto settings = Settings(Settings::Flags::no_flags);
 
         return std::make_tuple(settings, std::move(vec), std::vector<Production>());
     }
