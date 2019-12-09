@@ -48,7 +48,7 @@ namespace algorithm::bisection {
 
 		bool startReached = false;
 		robin_hood::unordered_flat_map<Production, Variable> map;
-		map.reserve(variables.size());
+		map.reserve(variables.size() / 4);
 
 		uint32_t offset = 0;
 		size_t size = variables.size();
@@ -58,7 +58,7 @@ namespace algorithm::bisection {
 
 			for (size_t i = 0; i < size / 2; ++i) {
 				const auto pair = map.emplace(Production{variables[2 * i], variables[2 * i + 1]},
-				                                  settings.offset(offset));
+				                              settings.offset(offset));
 				if (pair.second) {
 					++offset;
 					productions.emplace_back((*pair.first).first);
@@ -71,6 +71,7 @@ namespace algorithm::bisection {
 			size = (size / 2) + uneven;
 
 			startReached = size == 1;
+			map.clear();
 		}
 
 		variables.resize(size);
