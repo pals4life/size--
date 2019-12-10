@@ -55,7 +55,7 @@ void encode(const std::filesystem::path& input, const std::filesystem::path& out
 //        }
         else if(type == Algorithm::repair)
         {
-            auto variables = readSmartVariables(input);
+            auto variables = readVariables(input);
             return algorithm::repair::compress(std::move(variables), mode);
         }
         else
@@ -122,7 +122,7 @@ std::vector<Variable> readVariables(const std::filesystem::path& path)
 
 std::vector<Variable> readSmartVariables(const std::filesystem::path& path)
 {
-    constexpr size_t swap_size = 0; // 20 mb
+    constexpr size_t swap_size = 250000000; // 20 mb
     auto file = fopen(path.c_str(), "rb");
     if(not file) throw std::runtime_error("could not open file: " + path.string());
 

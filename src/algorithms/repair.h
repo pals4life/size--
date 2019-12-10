@@ -167,7 +167,7 @@ namespace algorithm::repair
                 for(size_t i = 0; i < min_occurrences; i++)
                 {
                     // reset map
-                    low[i] = std::unordered_map<Pair, bool>();
+                    low[i] = robin_hood::unordered_map<Pair, bool>();
                 }
             }
 
@@ -175,7 +175,7 @@ namespace algorithm::repair
             size_t high_index = 0;
             size_t low_index = 200;
 
-            std::vector<std::unordered_map<Pair, bool>> low;
+            std::vector<robin_hood::unordered_map<Pair, bool>> low;
             std::vector<std::pair<Pair, uint32_t>> high;
 
             // this seems to be a good guess
@@ -189,7 +189,7 @@ namespace algorithm::repair
             std::array<pointer, decrease_size> decrease_cache {};
         };
 
-        using map = std::unordered_map<Pair, std::pair<std::vector<Variable>, uint32_t>>;
+        using map = robin_hood::unordered_map<Pair, std::pair<std::vector<Variable>, uint32_t>>;
 
         class maxmap
         {
@@ -279,6 +279,11 @@ namespace algorithm::repair
                 queue.clear_unused(min_occurrences);
             }
 
+            auto empty() const noexcept
+            {
+                return map.empty();
+            }
+
         private:
             dot::map map;
             dot::queue queue;
@@ -307,7 +312,6 @@ namespace algorithm::repair
         if(mode == Mode::none_specified) mode = Mode::memory_efficient;
         if(mode == Mode::fast and string.size() > min_memory_efficient_size) mode = Mode::memory_efficient;
 
-
         Settings settings;
         dot::maxmap map(string.size(), min_occurrences, clear_factor, mode);
         std::vector<Production> productions;
@@ -320,8 +324,11 @@ namespace algorithm::repair
 
         while(true)
         {
+            if(map.empty()) break;
+
             const auto [key, value] = map.pop();
             if(value.second <= min_occurrences) break;
+
             const auto pair = decompose(key);
 
             // determine new value for production
